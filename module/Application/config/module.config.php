@@ -75,8 +75,10 @@ return array(
         'invokables' => array(
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
-            'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
+            'Application\Controller\Item' => Controller\ItemRestfulController::class,
             'Application\Controller\Review' => Controller\ReviewRestfulController::class,
+            'Application\Controller\Inputs' => Controller\InputsRestfulController::class,
+            'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
         ),
     ),
     'view_manager' => array(

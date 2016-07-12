@@ -6,17 +6,10 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
 
-class RvrRestfulController extends AbstractRestfulController
+class ItemRestfulController extends AbstractRestfulController
 {
   protected $itemTable;
-  protected $reviewTable;
-  protected $inputsTable;
 
-  public function indexAction() { return new ViewModel(); }
-
-
-
-  /* create tables */
   public function getItemTable()
   {
     if(!$this->itemTable)
@@ -27,31 +20,6 @@ class RvrRestfulController extends AbstractRestfulController
 
     return $this->itemTable;
   }
-
-  public function getReviewTable()
-  {
-    if(!$this->reviewTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->reviewTable = $sm->get('Application\Model\ReviewModelTable');
-    }
-
-    return $this->reviewTable;
-  }
-
-  public function getInputsTable()
-  {
-    if(!$this->inputsTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->inputsTable = $sm->get('Application\Model\InputsModelTable');
-    }
-
-    return $this->inputsTable;
-  }
-  /* end create tables */
-
-
 
   public function getList()
   {
@@ -74,6 +42,56 @@ class RvrRestfulController extends AbstractRestfulController
     ));
   }
 
+  public function create($data)
+  {
+    $newModel = new ItemModel();
+    $newModel->exchangeArray($data);
+    $result = $this->getItemTable()->saveItem($newModel);
+    $savedData = array();
+    if ($result == 1) {
+      $fetchList = $this->getListRaw();
+      $savedData = $fetchList[count($fetchList)-1];
+    }
+
+    return new JsonModel(array(
+      'result' => $result,
+      'data' => $newModel,
+    ));
+  }
+
+  public function update($id, $data)
+  {
+    $newModel = new ItemModel();
+    $newModel->exchangeArray($data);
+    $newModel->id = $id;
+    $result = $this->getItemTable()->saveItem($newModel);
+    $savedData = array();
+    if ($result == 1) {
+      $savedData = $this->get($id);
+    }
+
+    return new JsonModel(array(
+      'result' => $result,
+      'data' => $newModel,
+    ));
+  }
+
+  public function delete($id)
+  {
+    $delModel = $this->getItemTable()->getItem($id);
+    $result = $this->getItemTable()->deleteItem($id);
+
+    return new JsonModel(array(
+      'result' => $result,
+      'data' => $delModel->exchangeToArray(),
+    ));
+  }
+
+
+
+
+
+
   /* Utilities */
   public function getListRaw()
   {
@@ -95,30 +113,5 @@ class RvrRestfulController extends AbstractRestfulController
     }
 
     return $data;
-  }
-
-
-
-
-
-
-
-
-
-  public function create($data)
-  {
-    $newModel = new ItemModel();
-    $newModel->exchangeArray($data);
-    $result = $this->getItemTable()->saveItem($newModel);
-    $savedData = array();
-    if ($result == 1) {
-      $fetchList = $this->getListRaw();
-      $savedData = $fetchList[count($fetchList)-1];
-    }
-
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
   }
 }

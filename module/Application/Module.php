@@ -21,6 +21,9 @@ use Application\Model\ItemModelTable;
 use Application\Model\ReviewModel;
 use Application\Model\ReviewModelTable;
 
+use Application\Model\InputsModel;
+use Application\Model\InputsModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -86,6 +89,18 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
             return new TableGateway('reviews', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\InputsModelTable' => function($sm){
+            $tableGateway = $sm->get('InputsModelTableGateway');
+            $table = new InputsModelTable($tableGateway);
+            return $table;
+          },
+          'InputsModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new InputsModel());
+            return new TableGateway('inputs', $dbAdapter, null, $resultSetPrototype);
           },
         )
       );
