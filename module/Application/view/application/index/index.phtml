@@ -1,0 +1,53 @@
+<div id="a1"></div>
+<input id="button01" type="button" />
+
+<?php
+
+$this->inlineScript()->appendScript(
+<<<__END__
+
+function log(_){ console.log.apply(console, arguments); }
+function post(_opt){
+  var url = _opt["url"],
+      type = _opt["type"],
+      query = _opt["query"],
+      callback = _opt["callback"];
+  $.ajax({
+    "type": type,
+    "url": url,
+    "data": JSON.stringify(query),
+    "contentType": "application/json",
+    "dataType": "json",
+    "success": function(_data){ callback(true, _data); },
+    "error": function(_data){ callback(false, {"statusCode": _data["status"], "response": _data["responseText"]}); }
+  });
+}
+
+$("#button01").on("click", function(){
+  $("#a1").text($("#a1").text() + "a");
+  log("a");
+  var id = 1
+      query = {"text": "testest"};
+  // post({
+  //   "url": "http://localhost/app/test",
+  //   "type": "get",
+  //   "query": query,
+  //   "callback": function(_result, _data){
+  //     log(_result, _data);
+  //     if(!_result){ $("#a1").html(_data["response"]); }
+  //   }
+  // });
+
+  post({
+    "url": "http://localhost/app/test",
+    "type": "post",
+    "query": query,
+    "callback": function(_result, _data){
+      log(_result, _data);
+      if(!_result){ $("#a1").html(_data["response"]); }
+    }
+  });
+});
+
+__END__
+);
