@@ -76,6 +76,7 @@ return array(
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
             'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
+            'Application\Controller\Review' => Controller\ReviewRestfulController::class,
         ),
     ),
     'view_manager' => array(

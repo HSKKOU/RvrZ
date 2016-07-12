@@ -18,6 +18,9 @@ use Application\Model\TestModelTable;
 use Application\Model\ItemModel;
 use Application\Model\ItemModelTable;
 
+use Application\Model\ReviewModel;
+use Application\Model\ReviewModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -71,7 +74,19 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemModel());
             return new TableGateway('items', $dbAdapter, null, $resultSetPrototype);
-          }
+          },
+
+          'Application\Model\ReviewModelTable' => function($sm){
+            $tableGateway = $sm->get('ReviewModelTableGateway');
+            $table = new ReviewModelTable($tableGateway);
+            return $table;
+          },
+          'ReviewModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
+            return new TableGateway('reviews', $dbAdapter, null, $resultSetPrototype);
+          },
         )
       );
     }
