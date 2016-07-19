@@ -16,43 +16,25 @@ class RvrRestfulController extends AbstractRestfulController
 
 
 
-  /* create tables */
-  public function getItemTable()
-  {
-    if(!$this->itemTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->itemTable = $sm->get('Application\Model\ItemModelTable');
-    }
-
+  /* get db tables reference */
+  public function getItemTable() {
+    if(!$this->itemTable) { $this->itemTable = $this->getServiceLocator()->get('Application\Model\ItemModelTable'); }
     return $this->itemTable;
   }
-
-  public function getReviewTable()
-  {
-    if(!$this->reviewTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->reviewTable = $sm->get('Application\Model\ReviewModelTable');
-    }
-
+  public function getReviewTable() {
+    if(!$this->reviewTable) { $this->reviewTable = $this->getServiceLocator()->get('Application\Model\ReviewModelTable'); }
     return $this->reviewTable;
   }
-
-  public function getInputsTable()
-  {
-    if(!$this->inputsTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->inputsTable = $sm->get('Application\Model\InputsModelTable');
-    }
-
+  public function getInputsTable() {
+    if(!$this->inputsTable) { $this->inputsTable = $this->getServiceLocator()->get('Application\Model\InputsModelTable'); }
     return $this->inputsTable;
   }
-  /* end create tables */
+  /* end get db tables reference */
 
 
 
+
+  /* Restful API methods */
   public function getList()
   {
     return new JsonModel($this->getListRaw());
@@ -73,6 +55,28 @@ class RvrRestfulController extends AbstractRestfulController
       'genre_id' => $gotModel->genre_id,
     ));
   }
+
+
+  public function create($data)
+  {
+    $newModel = new ItemModel();
+    $newModel->exchangeArray($data);
+    $result = $this->getItemTable()->saveItem($newModel);
+    $savedData = array();
+    if ($result == 1) {
+      $fetchList = $this->getListRaw();
+      $savedData = $fetchList[count($fetchList)-1];
+    }
+
+    return new JsonModel(array(
+      'result' => $result,
+      'data' => $newModel,
+    ));
+  }
+  /* end Restful API methods */
+
+
+
 
   /* Utilities */
   public function getListRaw()
@@ -96,29 +100,7 @@ class RvrRestfulController extends AbstractRestfulController
 
     return $data;
   }
+  /* end Utilities */
 
 
-
-
-
-
-
-
-
-  public function create($data)
-  {
-    $newModel = new ItemModel();
-    $newModel->exchangeArray($data);
-    $result = $this->getItemTable()->saveItem($newModel);
-    $savedData = array();
-    if ($result == 1) {
-      $fetchList = $this->getListRaw();
-      $savedData = $fetchList[count($fetchList)-1];
-    }
-
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
-  }
 }
