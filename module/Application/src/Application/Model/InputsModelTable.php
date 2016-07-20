@@ -39,6 +39,7 @@ class InputsModelTable
       'gaze_item_positionV3' => $inputsModel->gaze_item_positionV3,
       'gaze_pointV2' => $inputsModel->gaze_pointV2,
       'around_item_ids' => $inputsModel->around_item_ids,
+      'gaze_at_time' => $inputsModel->gaze_at_time,
       'distance' => $inputsModel->distance,
       'time' => $inputsModel->time,
     );

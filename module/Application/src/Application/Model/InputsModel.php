@@ -10,6 +10,7 @@ class InputsModel
   public $gaze_item_positionV3;
   public $gaze_pointV2;
   public $around_item_ids;
+  public $gaze_at_time;
   public $distance;
   public $time;
 
@@ -22,6 +23,7 @@ class InputsModel
     $this->gaze_item_positionV3 = (isset($data['gaze_item_positionV3']))? $data['gaze_item_positionV3']:NULL;
     $this->gaze_pointV2 = (isset($data['gaze_pointV2']))? $data['gaze_pointV2']:NULL;
     $this->around_item_ids = (isset($data['around_item_ids']))? $data['around_item_ids']:NULL;
+    $this->gaze_at_time = (isset($data['gaze_at_time']))? $data['gaze_at_time']:NULL;
     $this->distance = (isset($data['distance']))? $data['distance']:NULL;
     $this->time = (isset($data['time']))? $data['time']:NULL;
   }
@@ -36,6 +38,7 @@ class InputsModel
       'gaze_item_positionV3' => $this->gaze_item_positionV3,
       'gaze_pointV2' => $this->gaze_pointV2,
       'around_item_ids' => $this->around_item_ids,
+      'gaze_at_time' => $this->gaze_at_time,
       'distance' => $this->distance,
       'time' => $this->time,
     );

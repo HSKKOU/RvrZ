@@ -37,6 +37,7 @@ class InputsRestfulController extends AbstractRestfulController
       'gaze_item_positionV3' => $gotModel->gaze_item_positionV3,
       'gaze_pointV2' => $gotModel->gaze_pointV2,
       'around_item_ids' => $gotModel->around_item_ids,
+      'gaze_at_time' => $gotModel->gaze_at_time,
       'distance' => $gotModel->distance,
       'time' => $gotModel->time,
     ));
@@ -44,18 +45,24 @@ class InputsRestfulController extends AbstractRestfulController
 
   public function create($data)
   {
-    $newModel = new InputsModel();
-    $newModel->exchangeArray($data);
-    $result = $this->getInputsTable()->saveInputs($newModel);
-    $savedData = array();
-    if ($result == 1) {
-      $fetchList = $this->getListRaw();
-      $savedData = $fetchList[count($fetchList)-1];
+    if (!array_key_exists('inputs', $data)) { return new JsonModel(array( 'result' => 0, 'data' => 'no inputs', 'opt' => $data )); }
+
+    $newModelArray = array();
+    foreach ($data['inputs'] as $key => $val) {
+      $newModel = new InputsModel();
+      $newModel->exchangeArray($val);
+      $result = $this->getInputsTable()->saveInputs($newModel);
+      $savedData = array();
+      if ($result == 1) {
+        $fetchList = $this->getListRaw();
+        $savedData = $fetchList[count($fetchList)-1];
+        $newModelArray[] = $savedData;
+      }
     }
 
     return new JsonModel(array(
       'result' => $result,
-      'data' => $newModel,
+      'data' => $newModelArray,
     ));
   }
 
@@ -107,6 +114,7 @@ class InputsRestfulController extends AbstractRestfulController
         'gaze_item_positionV3' => $row->gaze_item_positionV3,
         'gaze_pointV2' => $row->gaze_pointV2,
         'around_item_ids' => $row->around_item_ids,
+        'gaze_at_time' => $row->gaze_at_time,
         'distance' => $row->distance,
         'time' => $row->time,
       );
