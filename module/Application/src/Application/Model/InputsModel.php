@@ -24,7 +24,17 @@ class InputsModel
     $this->gaze_pointV2 = (isset($data['gaze_pointV2']))? $data['gaze_pointV2']:NULL;
     $this->around_item_ids = (isset($data['around_item_ids']))? $data['around_item_ids']:NULL;
     $this->gaze_at_time = (isset($data['gaze_at_time']))? $data['gaze_at_time']:NULL;
-    $this->distance = (isset($data['distance']))? $data['distance']:NULL;
+
+    if (isset($data['distance'])) {
+      $this->distance = $data['distance'];
+    } else {
+      $sqSum = 0;
+      $userPosSp = explode(',', $this->user_positionV3);
+      $itemPosSp = explode(',', $this->gaze_item_positionV3);
+      for ($i=0; $i<2; $i++) { $sqSum += pow((intval($userPosSp[$i]) - intval($itemPosSp[$i])), 2); }
+      $this->distance = sqrt($sqSum);
+    }
+
     $this->time = (isset($data['time']))? $data['time']:NULL;
   }
 
