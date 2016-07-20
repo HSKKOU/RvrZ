@@ -66,33 +66,33 @@ class InputsRestfulController extends AbstractRestfulController
     ));
   }
 
-  public function update($id, $data)
-  {
-    $newModel = new InputsModel();
-    $newModel->exchangeArray($data);
-    $newModel->id = $id;
-    $result = $this->getInputsTable()->saveInputs($newModel);
-    $savedData = array();
-    if ($result == 1) {
-      $savedData = $this->get($id);
-    }
-
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
-  }
-
-  public function delete($id)
-  {
-    $delModel = $this->getInputsTable()->getInputs($id);
-    $result = $this->getInputsTable()->deleteInputs($id);
-
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $delModel->exchangeToArray(),
-    ));
-  }
+  // public function update($id, $data)
+  // {
+  //   $newModel = new InputsModel();
+  //   $newModel->exchangeArray($data);
+  //   $newModel->id = $id;
+  //   $result = $this->getInputsTable()->saveInputs($newModel);
+  //   $savedData = array();
+  //   if ($result == 1) {
+  //     $savedData = $this->get($id);
+  //   }
+  //
+  //   return new JsonModel(array(
+  //     'result' => $result,
+  //     'data' => $newModel,
+  //   ));
+  // }
+  //
+  // public function delete($id)
+  // {
+  //   $delModel = $this->getInputsTable()->getInputs($id);
+  //   $result = $this->getInputsTable()->deleteInputs($id);
+  //
+  //   return new JsonModel(array(
+  //     'result' => $result,
+  //     'data' => $delModel->exchangeToArray(),
+  //   ));
+  // }
 
 
 
