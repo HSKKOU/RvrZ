@@ -27,6 +27,8 @@ class InputsModel
 
     if (isset($data['distance'])) {
       $this->distance = $data['distance'];
+    } else if ($this->user_positionV3 == NULL || $this->gaze_item_positionV3 == NULL) {
+      $this->distance = NULL;
     } else {
       $sqSum = 0;
       $userPosSp = explode(',', $this->user_positionV3);
@@ -34,7 +36,7 @@ class InputsModel
       for ($i=0; $i<2; $i++) { $sqSum += pow((intval($userPosSp[$i]) - intval($itemPosSp[$i])), 2); }
       $this->distance = sqrt($sqSum);
     }
-
+    
     $this->time = (isset($data['time']))? $data['time']:NULL;
   }
 
