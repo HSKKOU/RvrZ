@@ -6,7 +6,7 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\TestModel;
 
-class TestRestfulController extends AbstractRestfulController
+class TestRestfulController extends AbstractRvrController
 {
   protected $testModelTable;
 

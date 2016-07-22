@@ -6,7 +6,7 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
 
-class RvrRestfulController extends AbstractRestfulController
+class RvrRestfulController extends AbstractRvrController
 {
   protected $itemTable;
   protected $reviewTable;
@@ -37,13 +37,13 @@ class RvrRestfulController extends AbstractRestfulController
   /* Restful API methods */
   public function getList()
   {
-    return new JsonModel($this->getListRaw());
+    return $this->makeSuccessJson($this->getListRaw());
   }
 
   public function get($id)
   {
     $gotModel = $this->getItemTable()->getItem($id);
-    return new JsonModel(array(
+    return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
       'name' => $gotModel->name,
       'price' => $gotModel->price,
@@ -68,10 +68,7 @@ class RvrRestfulController extends AbstractRestfulController
       $savedData = $fetchList[count($fetchList)-1];
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
+    return $this->makeJson($result, $newModel);
   }
   /* end Restful API methods */
 

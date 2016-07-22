@@ -36,7 +36,7 @@ class InputsModel
       for ($i=0; $i<2; $i++) { $sqSum += pow((intval($userPosSp[$i]) - intval($itemPosSp[$i])), 2); }
       $this->distance = sqrt($sqSum);
     }
-    
+
     $this->time = (isset($data['time']))? $data['time']:NULL;
   }
 

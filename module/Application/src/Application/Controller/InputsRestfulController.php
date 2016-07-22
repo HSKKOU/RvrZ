@@ -6,7 +6,7 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\InputsModel;
 
-class InputsRestfulController extends AbstractRestfulController
+class InputsRestfulController extends AbstractRvrController
 {
   protected $inputsTable;
 
@@ -23,13 +23,13 @@ class InputsRestfulController extends AbstractRestfulController
 
   public function getList()
   {
-    return new JsonModel($this->getListRaw());
+    return $this->makeSuccessJson($this->getListRaw());
   }
 
   public function get($id)
   {
     $gotModel = $this->getInputsTable()->getInputs($id);
-    return new JsonModel(array(
+    return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
       'user_id' => $gotModel->user_id,
       'user_positionV3' => $gotModel->user_positionV3,
@@ -45,25 +45,17 @@ class InputsRestfulController extends AbstractRestfulController
 
   public function create($data)
   {
-    if (!array_key_exists('inputs', $data)) { return new JsonModel(array( 'result' => 0, 'data' => 'no inputs', 'opt' => $data )); }
+    if (!array_key_exists('inputs', $data)) { return $this->makeFailedJson('no inputs', $data ); }
 
     $newModelArray = array();
     foreach ($data['inputs'] as $key => $val) {
       $newModel = new InputsModel();
       $newModel->exchangeArray($val);
       $result = $this->getInputsTable()->saveInputs($newModel);
-      $savedData = array();
-      if ($result == 1) {
-        $fetchList = $this->getListRaw();
-        $savedData = $fetchList[count($fetchList)-1];
-        $newModelArray[] = $savedData;
-      }
+      if ($result == 1) { $newModelArray[] = $this->getInputsTable()->getLastInputs(); }
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModelArray,
-    ));
+    return $this->makeJson($result, $newModelArray);
   }
 
   // public function update($id, $data)

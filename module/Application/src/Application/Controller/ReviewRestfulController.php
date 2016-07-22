@@ -6,7 +6,7 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\ReviewModel;
 
-class ReviewRestfulController extends AbstractRestfulController
+class ReviewRestfulController extends AbstractRvrController
 {
   protected $reviewTable;
 
@@ -28,13 +28,13 @@ class ReviewRestfulController extends AbstractRestfulController
 
   public function getList()
   {
-    return new JsonModel($this->getListRaw());
+    return $this->makeSuccessJson($this->getListRaw());
   }
 
   public function get($id)
   {
     $gotModel = $this->getReviewTable()->getReview($id);
-    return new JsonModel(array(
+    return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
       'user_name' => $gotModel->user_name,
       'user_age' => $gotModel->user_age,
@@ -67,10 +67,7 @@ class ReviewRestfulController extends AbstractRestfulController
       $savedData = $fetchList[count($fetchList)-1];
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
+    return $this->makeJson($result, $newModel);
   }
 
   public function update($id, $data)
@@ -84,10 +81,7 @@ class ReviewRestfulController extends AbstractRestfulController
       $savedData = $this->get($id);
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
+    return $this->makeJson($result, $newModel);
   }
 
   public function delete($id)
@@ -95,10 +89,7 @@ class ReviewRestfulController extends AbstractRestfulController
     $delModel = $this->getReviewTable()->getReview($id);
     $result = $this->getReviewTable()->deleteReview($id);
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $delModel->exchangeToArray(),
-    ));
+    return $this->makeJson($result, $delModel->exchangeToArray());
   }
 
 

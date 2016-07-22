@@ -30,6 +30,18 @@ class InputsModelTable
     return $row;
   }
 
+  public function getLastInputs()
+  {
+    $id = $this->getLastId();
+    $rowSet = $this->tableGateway->select(array('id' => $id));
+    $row = $rowSet->current();
+    if(!$row) {
+      throw new \Exception("Could not find roe $id");
+    }
+
+    return $row;
+  }
+
   public function saveInputs(InputsModel $inputsModel)
   {
     $data = array(
@@ -59,5 +71,11 @@ class InputsModelTable
   public function deleteInputs($id)
   {
     return $this->tableGateway->delete(array('id' => (int)$id));
+  }
+
+
+  public function getLastId()
+  {
+    return $this->tableGateway->lastInsertValue;
   }
 }

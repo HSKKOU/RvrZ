@@ -6,7 +6,7 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
 
-class ItemRestfulController extends AbstractRestfulController
+class ItemRestfulController extends AbstractRvrController
 {
   protected $itemTable;
 
@@ -23,23 +23,24 @@ class ItemRestfulController extends AbstractRestfulController
 
   public function getList()
   {
-    return new JsonModel($this->getListRaw());
+    return $this->makeSuccessJson($this->getListRaw());
   }
 
   public function get($id)
   {
     $gotModel = $this->getItemTable()->getItem($id);
-    return new JsonModel(array(
-      'id' => $gotModel->id,
-      'name' => $gotModel->name,
-      'price' => $gotModel->price,
-      'description' => $gotModel->description,
-      'url_item' => $gotModel->url_item,
-      'url_image' => $gotModel->url_image,
-      'review_num' => $gotModel->review_num,
-      'review_avg' => $gotModel->review_avg,
-      'genre_id' => $gotModel->genre_id,
-    ));
+    return $this->makeSuccessJson(array(
+        'id' => $gotModel->id,
+        'name' => $gotModel->name,
+        'price' => $gotModel->price,
+        'description' => $gotModel->description,
+        'url_item' => $gotModel->url_item,
+        'url_image' => $gotModel->url_image,
+        'review_num' => $gotModel->review_num,
+        'review_avg' => $gotModel->review_avg,
+        'genre_id' => $gotModel->genre_id,
+      )
+    );
   }
 
   public function create($data)
@@ -53,10 +54,7 @@ class ItemRestfulController extends AbstractRestfulController
       $savedData = $fetchList[count($fetchList)-1];
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
+    return $this->makeSuccessJson($newModel);
   }
 
   public function update($id, $data)
@@ -70,10 +68,7 @@ class ItemRestfulController extends AbstractRestfulController
       $savedData = $this->get($id);
     }
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $newModel,
-    ));
+    return $this->makeSuccessJson($newModel);
   }
 
   public function delete($id)
@@ -81,10 +76,7 @@ class ItemRestfulController extends AbstractRestfulController
     $delModel = $this->getItemTable()->getItem($id);
     $result = $this->getItemTable()->deleteItem($id);
 
-    return new JsonModel(array(
-      'result' => $result,
-      'data' => $delModel->exchangeToArray(),
-    ));
+    return $this->makeSuccessJson($delModel->exchangeToArray());
   }
 
 
