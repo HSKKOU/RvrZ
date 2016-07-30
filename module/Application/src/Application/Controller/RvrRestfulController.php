@@ -43,7 +43,8 @@ class RvrRestfulController extends AbstractRvrController
 
   public function get($user_id)
   {
-    $recoms = $this->createRecommendations($user_id);
+    $recomCrtr = new RecommendCreator($this, $user_id);
+    $recoms = $recomCrtr->createRecommendations();
     return $this->makeSuccessJson($recoms);
   }
   /* end Restful API methods */
@@ -52,11 +53,37 @@ class RvrRestfulController extends AbstractRvrController
 
 
   /* Recommendation */
-  public function createRecommendations($user_id)
+
+  /* end Recommendation */
+
+
+
+  /* Utilities */
+  /* end Utilities */
+
+
+}
+
+class RecommendCreator
+{
+  private $user_id;
+  private $rvrCtrl;
+
+  protected $distThreshold = 200.0;
+  protected $maxStar = 5.0;
+  protected $minStar = 3.0;
+
+  public function __construct($_rvrCtrl, $_user_id)
+  {
+    $this->rvrCtrl = $_rvrCtrl;
+    $this->user_id = $_user_id;
+  }
+
+  public function createRecommendations()
   {
     $data = array();
 
-    $inputs = $this->getInputsTable()->getInputsByUser($user_id);
+    $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
 
     $data = $gis;
@@ -64,7 +91,7 @@ class RvrRestfulController extends AbstractRvrController
     return $data;
   }
 
-  public function createGazeInfoForEachItems($inputs)
+  private function createGazeInfoForEachItems($inputs)
   {
     $gazeInfoForEachItems = array();
     for ($i=0; $i<count($inputs); $i++) {
@@ -90,12 +117,9 @@ class RvrRestfulController extends AbstractRvrController
 
     return $gazeInfoForEachItems;
   }
-  /* end Recommendation */
 
+  private function calcReputationFromGazeInfo()
+  {
 
-
-  /* Utilities */
-  /* end Utilities */
-
-
+  }
 }
