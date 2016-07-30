@@ -46,10 +46,14 @@ class InputsRestfulController extends AbstractRvrController
   public function create($data)
   {
     if (!array_key_exists('inputs', $data)) { return $this->makeFailedJson('no inputs', $data ); }
+    if (!array_key_exists('userId', $data)) { return $this->makeFailedJson('no user id', $data ); }
+
+    $userId = $data['userId'];
 
     $newModelArray = array();
     foreach ($data['inputs'] as $key => $val) {
       $newModel = new InputsModel();
+      $val['user_id'] = $userId;
       $newModel->exchangeArray($val);
       $result = $this->getInputsTable()->saveInputs($newModel);
       if ($result == 1) { $newModelArray[] = $this->getInputsTable()->getLastInputs(); }

@@ -79,6 +79,7 @@ return array(
             'Application\Controller\Review' => Controller\ReviewRestfulController::class,
             'Application\Controller\Inputs' => Controller\InputsRestfulController::class,
             'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
+            'Application\Controller\User' => Controller\UserRestfulController::class,
         ),
     ),
     'view_manager' => array(

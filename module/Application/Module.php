@@ -24,6 +24,9 @@ use Application\Model\ReviewModelTable;
 use Application\Model\InputsModel;
 use Application\Model\InputsModelTable;
 
+use Application\Model\UserModel;
+use Application\Model\UserModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -101,6 +104,18 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new InputsModel());
             return new TableGateway('inputs', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\UserModelTable' => function($sm){
+            $tableGateway = $sm->get('UserModelTableGateway');
+            $table = new UserModelTable($tableGateway);
+            return $table;
+          },
+          'UserModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new UserModel());
+            return new TableGateway('users', $dbAdapter, null, $resultSetPrototype);
           },
         )
       );
