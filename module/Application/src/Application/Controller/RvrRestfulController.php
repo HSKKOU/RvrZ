@@ -5,6 +5,7 @@ use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
+use Application\Model\InputsModel;
 
 class RvrRestfulController extends AbstractRvrController
 {
@@ -40,63 +41,60 @@ class RvrRestfulController extends AbstractRvrController
     return $this->makeSuccessJson($this->getListRaw());
   }
 
-  public function get($id)
+  public function get($user_id)
   {
-    $gotModel = $this->getItemTable()->getItem($id);
-    return $this->makeSuccessJson(array(
-      'id' => $gotModel->id,
-      'name' => $gotModel->name,
-      'price' => $gotModel->price,
-      'description' => $gotModel->description,
-      'url_item' => $gotModel->url_item,
-      'url_image' => $gotModel->url_image,
-      'review_num' => $gotModel->review_num,
-      'review_avg' => $gotModel->review_avg,
-      'genre_id' => $gotModel->genre_id,
-    ));
-  }
-
-
-  public function create($data)
-  {
-    $newModel = new ItemModel();
-    $newModel->exchangeArray($data);
-    $result = $this->getItemTable()->saveItem($newModel);
-    $savedData = array();
-    if ($result == 1) {
-      $fetchList = $this->getListRaw();
-      $savedData = $fetchList[count($fetchList)-1];
-    }
-
-    return $this->makeJson($result, $newModel);
+    $recoms = $this->createRecommendations($user_id);
+    return $this->makeSuccessJson($recoms);
   }
   /* end Restful API methods */
 
 
 
 
-  /* Utilities */
-  public function getListRaw()
+  /* Recommendation */
+  public function createRecommendations($user_id)
   {
     $data = array();
 
-    $rowSet = $this->getItemTable()->fetchAll();
-    foreach ($rowSet as $row) {
-      $data[] = array(
-        'id' => $row->id,
-        'name' => $row->name,
-        'price' => $row->price,
-        'description' => $row->description,
-        'url_item' => $row->url_item,
-        'url_image' => $row->url_image,
-        'review_num' => $row->review_num,
-        'review_avg' => $row->review_avg,
-        'genre_id' => $row->genre_id,
-      );
-    }
+    $inputs = $this->getInputsTable()->getInputsByUser($user_id);
+    $gis = $this->createGazeInfoForEachItems($inputs);
+
+    $data = $gis;
 
     return $data;
   }
+
+  public function createGazeInfoForEachItems($inputs)
+  {
+    $gazeInfoForEachItems = array();
+    for ($i=0; $i<count($inputs); $i++) {
+      $ip = $inputs[$i];
+      if($ip->gaze_item_id == 0) { continue; }
+      if (!isset($gazeInfoForEachItems[$ip->gaze_item_id])) {
+        $gazeInfoForEachItems[$ip->gaze_item_id] = array(
+          'count' => 1,
+          'aveDist' => floatval($ip->distance),
+          'totalTime' => floatval($ip->time),
+        );
+      } else {
+        $gi = $gazeInfoForEachItems[$ip->gaze_item_id];
+        $gazeInfoForEachItems[$ip->gaze_item_id] = array(
+          'count' => $gi['count']+1,
+          'aveDist' => ($gi['aveDist'] * $gi['count'] + floatval($ip->distance)) / ($gi['count']+1),
+          'totalTime' => $gi['totalTime'] + floatval($ip->time),
+        );
+      }
+    }
+
+    ksort($gazeInfoForEachItems);
+
+    return $gazeInfoForEachItems;
+  }
+  /* end Recommendation */
+
+
+
+  /* Utilities */
   /* end Utilities */
 
 

@@ -37,7 +37,7 @@ class InputsModel
       $this->distance = sqrt($sqSum);
     }
 
-    $this->time = (isset($data['time']))? $data['time']:NULL;
+    $this->time = (isset($data['time']))? $data['time']:"0";
   }
 
   public function exchangeToArray()

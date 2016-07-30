@@ -42,6 +42,19 @@ class InputsModelTable
     return $row;
   }
 
+  public function getInputsByUser($user_id)
+  {
+    $rowSet = $this->tableGateway->select(array('user_id' => $user_id));
+
+    $retInputs = array();
+    while ($row = $rowSet->current()) {
+      $retInputs[] = $row;
+      $rowSet->next();
+    }
+
+    return $retInputs;
+  }
+
   public function saveInputs(InputsModel $inputsModel)
   {
     $data = array(
