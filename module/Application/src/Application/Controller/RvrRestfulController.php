@@ -85,13 +85,14 @@ class RecommendCreator
 
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
+    $reps = $this->calcReputationFromGazeInfoAll($gis);
 
-    $data = $gis;
+    $data = $reps;
 
     return $data;
   }
 
-  private function createGazeInfoForEachItems($inputs)
+  protected function createGazeInfoForEachItems($inputs)
   {
     $gazeInfos = array();
     for ($i=0; $i<count($inputs); $i++) {
@@ -120,8 +121,61 @@ class RecommendCreator
     return $gazeInfos;
   }
 
-  private function calcReputationFromGazeInfo()
-  {
+  /* only total time */
+  protected function calcReputationFromGazeInfoTotalTime($_gis) { return calcReputationFromGazeInfoBase($_gis, 'totalTime'); }
+  /* only distance */
+  protected function calcReputationFromGazeInfoAveDist($_gis) { return calcReputationFromGazeInfoBase($_gis, 'aveDist'); }
 
+  protected function calcReputationFromGazeInfoBase($_gis, $_column_name)
+  {
+    $reps = array();
+
+    $clMax = 0;
+    $clMin = 100000000000;
+    for ($i=0; $i<count($_gis); $i++) {
+      $gi = $_gis[$i];
+      $giTT = $gi[$_column_name];
+      if ($giTT > $clMax) { $clMax = $giTT; }
+      if ($giTT < $clMin) { $clMin = $giTT; }
+    }
+
+    for ($i=0; $i<count($_gis); $i++) {
+      $gi = $_gis[$i];
+      $giTT = $gi[$_column_name];
+      $nCl = ($giTT - $clMin) / ($clMax - $clMin);
+      $reps[$i] = ($maxStar - $minStar) * $nCl + $minStar;
+    }
+
+    return $reps;
+  }
+
+  /* totalTime and distance */
+  protected function calcReputationFromGazeInfoAll($_gis)
+  {
+    $reps = array();
+
+    $timeMax = 0;
+    $timeMin = 100000000000;
+    $distMax = 0;
+    $distMin = 100000000000;
+    for ($i=0; $i<count($_gis); $i++) {
+      $gi = $_gis[$i];
+      $giTT = $gi['totalTime'];
+      $giAD = $gi['aveDist'];
+      if ($giTT > $timeMax) { $timeMax = $giTT; }
+      if ($giTT < $timeMin) { $timeMin = $giTT; }
+      if ($giAD > $distMax) { $distMax = $giAD; }
+      if ($giAD < $distMin) { $distMin = $giAD; }
+    }
+
+    for ($i=0; $i<count($_gis); $i++) {
+      $gi = $_gis[$i];
+      $giTT = $gi['totalTime'];
+      $giAD = $gi['aveDist'];
+      $nCl = sqrt(($giTT - $timeMin) * ($giAD - $distMin) / ($timeMax - $timeMin) / ($distMax - $distMin));
+      $reps[$i] = ($maxStar - $minStar) * $nCl + $minStar;
+    }
+
+    return $reps;
   }
 }
