@@ -84,14 +84,14 @@ class RecommendCreator
     $data = array();
 
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
-    $gis = $this->createGazeInfos($inputs);
+    $gis = $this->createGazeInfoForEachItems($inputs);
 
     $data = $gis;
 
     return $data;
   }
 
-  private function createGazeInfos($inputs)
+  private function createGazeInfoForEachItems($inputs)
   {
     $gazeInfos = array();
     for ($i=0; $i<count($inputs); $i++) {
