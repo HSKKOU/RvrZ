@@ -84,38 +84,40 @@ class RecommendCreator
     $data = array();
 
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
-    $gis = $this->createGazeInfoForEachItems($inputs);
+    $gis = $this->createGazeInfos($inputs);
 
     $data = $gis;
 
     return $data;
   }
 
-  private function createGazeInfoForEachItems($inputs)
+  private function createGazeInfos($inputs)
   {
-    $gazeInfoForEachItems = array();
+    $gazeInfos = array();
     for ($i=0; $i<count($inputs); $i++) {
       $ip = $inputs[$i];
-      if($ip->gaze_item_id == 0) { continue; }
-      if (!isset($gazeInfoForEachItems[$ip->gaze_item_id])) {
-        $gazeInfoForEachItems[$ip->gaze_item_id] = array(
+      if ($ip->gaze_item_id == 0) { continue; }
+      if (!isset($gazeInfos[$ip->gaze_item_id])) {
+        $gazeInfos[$ip->gaze_item_id] = array(
           'count' => 1,
           'aveDist' => floatval($ip->distance),
           'totalTime' => floatval($ip->time),
         );
       } else {
-        $gi = $gazeInfoForEachItems[$ip->gaze_item_id];
-        $gazeInfoForEachItems[$ip->gaze_item_id] = array(
+        $gi = $gazeInfos[$ip->gaze_item_id];
+        $gazeInfos[$ip->gaze_item_id] = array(
           'count' => $gi['count']+1,
-          'aveDist' => ($gi['aveDist'] * $gi['count'] + floatval($ip->distance)) / ($gi['count']+1),
+          'aveDist' => $gi['aveDist'] + floatval($ip->distance),
           'totalTime' => $gi['totalTime'] + floatval($ip->time),
         );
       }
     }
 
-    ksort($gazeInfoForEachItems);
+    for ($i=0; $i<count($gazeInfos); $i++) { $gazeInfos[$i]['aveDist'] /= $gazeInfos[$i]['count']; }
 
-    return $gazeInfoForEachItems;
+    ksort($gazeInfos);
+
+    return $gazeInfos;
   }
 
   private function calcReputationFromGazeInfo()
