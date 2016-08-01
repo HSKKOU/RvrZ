@@ -43,7 +43,7 @@ class RvrRestfulController extends AbstractRvrController
 
   public function get($user_id)
   {
-    $recomCrtr = new RecommendCreator($this, $user_id);
+    $recomCrtr = new RC01($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
     return $this->makeSuccessJson($recoms);
   }
@@ -52,9 +52,7 @@ class RvrRestfulController extends AbstractRvrController
 
 
 
-  /* Recommendation */
 
-  /* end Recommendation */
 
 
 
@@ -62,6 +60,14 @@ class RvrRestfulController extends AbstractRvrController
   /* end Utilities */
 
 
+}
+
+
+/* Recommendation */
+class RC01 extends RecommendCreator
+{
+  protected $maxStar = 5.0;
+  protected $minStar = 1.0;
 }
 
 class RecommendCreator
@@ -81,21 +87,22 @@ class RecommendCreator
 
   public function createRecommendations()
   {
-    $data = array();
-
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
     $reps = $this->calcReputationFromGazeInfoAll($gis);
 
-    $data = $reps;
-
-    return $data;
+    return array(
+      'gis' => $gis,
+      'reps' => $reps,
+    );
   }
 
   protected function createGazeInfoForEachItems($inputs)
   {
     $gazeInfos = array();
-    for ($i=0; $i<count($inputs); $i++) {
+    // for ($i=0; $i<count($inputs); $i++) {
+    foreach ($inputs as $i => $val) {
+      if (!isset($inputs[$i])) { continue; }
       $ip = $inputs[$i];
       if ($ip->gaze_item_id == 0) { continue; }
       if (!isset($gazeInfos[$ip->gaze_item_id])) {
@@ -114,7 +121,11 @@ class RecommendCreator
       }
     }
 
-    for ($i=0; $i<count($gazeInfos); $i++) { $gazeInfos[$i]['aveDist'] /= $gazeInfos[$i]['count']; }
+    // for ($i=0; $i<count($gazeInfos); $i++) {
+    foreach ($gazeInfos as $i => $val) {
+      if (!isset($gazeInfos[$i])) { continue; }
+      $gazeInfos[$i]['aveDist'] /= $gazeInfos[$i]['count'];
+    }
 
     ksort($gazeInfos);
 
@@ -133,18 +144,22 @@ class RecommendCreator
 
     $clMax = 0;
     $clMin = 100000000000;
-    for ($i=0; $i<count($_gis); $i++) {
+    // for ($i=0; $i<count($_gis); $i++) {
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
       $gi = $_gis[$i];
       $giTT = $gi[$_column_name];
       if ($giTT > $clMax) { $clMax = $giTT; }
       if ($giTT < $clMin) { $clMin = $giTT; }
     }
 
-    for ($i=0; $i<count($_gis); $i++) {
+    // for ($i=0; $i<count($_gis); $i++) {
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
       $gi = $_gis[$i];
       $giTT = $gi[$_column_name];
       $nCl = ($giTT - $clMin) / ($clMax - $clMin);
-      $reps[$i] = ($maxStar - $minStar) * $nCl + $minStar;
+      $reps[$i] = ($this->maxStar - $this->minStar) * $nCl + $this->minStar;
     }
 
     return $reps;
@@ -159,7 +174,9 @@ class RecommendCreator
     $timeMin = 100000000000;
     $distMax = 0;
     $distMin = 100000000000;
-    for ($i=0; $i<count($_gis); $i++) {
+    // for ($i=0; $i<count($_gis); $i++) {
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
       $gi = $_gis[$i];
       $giTT = $gi['totalTime'];
       $giAD = $gi['aveDist'];
@@ -169,14 +186,17 @@ class RecommendCreator
       if ($giAD < $distMin) { $distMin = $giAD; }
     }
 
-    for ($i=0; $i<count($_gis); $i++) {
+    // for ($i=0; $i<count($_gis); $i++) {
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
       $gi = $_gis[$i];
       $giTT = $gi['totalTime'];
       $giAD = $gi['aveDist'];
-      $nCl = sqrt(($giTT - $timeMin) * ($giAD - $distMin) / ($timeMax - $timeMin) / ($distMax - $distMin));
-      $reps[$i] = ($maxStar - $minStar) * $nCl + $minStar;
+      $nCl = sqrt(($giTT - $timeMin) / ($timeMax - $timeMin) * (1 - ($giAD - $distMin) / ($distMax - $distMin)) );
+      $reps[$i] = ($this->maxStar - $this->minStar) * $nCl + $this->minStar;
     }
 
     return $reps;
   }
+  /* end Recommendation */
 }
