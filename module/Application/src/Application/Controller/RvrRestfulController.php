@@ -147,11 +147,13 @@ class RecommendCreator
     $reps = $this->calcReputationFromGazeInfoAll($gis);
     $repsSim = $this->calcReptationSimilarity($reps);
 
-    return array(
-      'gis' => $gis,
-      'reps' => $reps,
-      'sim' => $repsSim,
-    );
+    // return array(
+    //   'gis' => $gis,
+    //   'reps' => $reps,
+    //   'sim' => $repsSim,
+    // );
+
+    return $repsSim;
   }
 
   protected function createGazeInfoForEachItems($inputs)
@@ -262,12 +264,27 @@ class RecommendCreator
   {
     $imt = $this->rvrCtrl->getItemMatchTable();
     $rt = $this->rvrCtrl->getReviewTable();
+    $scores = array();
+    $totalSim = array();
+    $rankings = array();
+
     foreach ($_reps as $rKey => $rep) {
       $sims = $imt->getItemMatches(intval($rKey));
       foreach ($sims as $k => $v) {
-        if (array_key_exists(intval($v['matched_item_id']), $_reps)) { continue; }
+        $targetId = intval($v['matched_item_id']);
+        if (array_key_exists($targetId, $_reps)) { continue; }
+        if (!array_key_exists($targetId, $scores)) { $scores[$targetId] = 0.0; }
+        $scores[$targetId] += floatval($v['similarity']) * floatval($rep);
+        if (!array_key_exists($targetId, $totalSim)) { $totalSim[$targetId] = 0.0; }
+        $totalSim[$targetId] += floatval($v['similarity']);
       }
     }
+
+    foreach ($scores as $sk => $score) { $rankings[$sk] = $score / $totalSim[$sk]; }
+
+    arsort($rankings);
+
+    return $rankings;
   }
   /* end Recommendation */
 }
