@@ -126,6 +126,7 @@ class RecommendCreator
   /* only distance */
   protected function calcReputationFromGazeInfoAveDist($_gis) { return calcReputationFromGazeInfoBase($_gis, 'aveDist'); }
 
+  /* calc reputation method base */
   protected function calcReputationFromGazeInfoBase($_gis, $_column_name)
   {
     $reps = array();
