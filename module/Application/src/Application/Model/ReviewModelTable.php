@@ -30,13 +30,27 @@ class ReviewModelTable
     return $row;
   }
 
+  public function getReviewsByItemId($item_id)
+  {
+    $item_id = (int)$item_id;
+    $rowSet = $this->tableGateway->select(array('item_id' => $item_id));
+
+    $retReviews = array();
+    while ($row = $rowSet->current()) {
+      $retReviews[] = $row;
+      $rowSet->next();
+    }
+
+    return $retReviews;
+  }
+
   public function saveReview(ReviewModel $reviewModel)
   {
     $data = array(
       'user_name' => $reviewModel->user_name,
       'user_age' => $reviewModel->user_age,
       'user_sex' => $reviewModel->user_sex,
-      'item_code' => $reviewModel->item_code,
+      'item_id' => $reviewModel->item_id,
       'item_name' => $reviewModel->item_name,
       'store_name' => $reviewModel->store_name,
       'url_item' => $reviewModel->url_item,

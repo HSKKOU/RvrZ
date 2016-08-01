@@ -7,7 +7,7 @@ class ReviewModel
   public $user_name;
   public $user_age;
   public $user_sex;
-  public $item_code;
+  public $item_id;
   public $item_name;
   public $store_name;
   public $url_item;
@@ -29,7 +29,7 @@ class ReviewModel
     $this->user_name = (isset($data['user_name']))? $data['user_name']:NULL;
     $this->user_age = (isset($data['user_age']))? $data['user_age']:NULL;
     $this->user_sex = (isset($data['user_sex']))? $data['user_sex']:NULL;
-    $this->item_code = (isset($data['item_code']))? $data['item_code']:NULL;
+    $this->item_id = (isset($data['item_id']))? $data['item_id']:NULL;
     $this->item_name = (isset($data['item_name']))? $data['item_name']:NULL;
     $this->store_name = (isset($data['store_name']))? $data['store_name']:NULL;
     $this->url_item = (isset($data['url_item']))? $data['url_item']:NULL;
@@ -52,7 +52,7 @@ class ReviewModel
       'user_name' => $this->user_name,
       'user_age' => $this->user_age,
       'user_sex' => $this->user_sex,
-      'item_code' => $this->item_code,
+      'item_id' => $this->item_id,
       'item_name' => $this->item_name,
       'store_name' => $this->store_name,
       'url_item' => $this->url_item,

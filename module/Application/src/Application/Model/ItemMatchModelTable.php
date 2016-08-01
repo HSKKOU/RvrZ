@@ -28,6 +28,29 @@ class ItemMatchModelTable
     return $row;
   }
 
+  public function getItemMatches($item_id)
+  {
+    $item_id = (int)$item_id;
+    $select = $this->tableGateway->getSql()->select();
+    $select->where->equalTo('item_id', $item_id)
+                  ->or
+                  ->equalTo('matched_item_id', $item_id);
+    $rowSet = $this->tableGateway->selectWith($select);
+
+    $retMatches = array();
+    while ($row = $rowSet->current()) {
+      $matched = array(
+        'matched_item_id' => $row->matched_item_id,
+        'similarity' => $row->similarity,
+      );
+      if ($matched['matched_item_id'] == $item_id) { $matched['matched_item_id'] = $row->item_id; }
+      $retMatches[] = $matched;
+      $rowSet->next();
+    }
+
+    return $retMatches;
+  }
+
   public function saveItemMatch(ItemMatchModel $itemMatchModel)
   {
     $data = array(

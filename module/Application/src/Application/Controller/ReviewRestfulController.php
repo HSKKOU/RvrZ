@@ -33,13 +33,21 @@ class ReviewRestfulController extends AbstractRvrController
 
   public function get($id)
   {
+    if ($id == 'createDummy') {
+      $this->createDummyReviews(100);
+      return $this->makeSuccessJson('created Dummies');
+    } else if ($id == 'reflectReviews') {
+      $this->reflectReviewsToItemTable();
+      return $this->makeSuccessJson('reflected reviews');
+    }
+
     $gotModel = $this->getReviewTable()->getReview($id);
     return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
       'user_name' => $gotModel->user_name,
       'user_age' => $gotModel->user_age,
       'user_sex' => $gotModel->user_sex,
-      'item_code' => $gotModel->item_code,
+      'item_id' => $gotModel->item_id,
       'item_name' => $gotModel->item_name,
       'store_name' => $gotModel->store_name,
       'url_item' => $gotModel->url_item,
@@ -55,6 +63,61 @@ class ReviewRestfulController extends AbstractRvrController
       'review_date' => $gotModel->review_date,
     ));
   }
+
+  private function createDummyReviews($_userNum)
+  {
+    $items = $this->getServiceLocator()->get('Application\Model\ItemModelTable')->fetchAll();
+    $maxReviewNum = count($items) / 2;
+    for ($ui=0; $ui<$_userNum; $ui++) {
+      $itemIds = array();
+      for ($c=0; $c<count($items); $c++) { $itemIds[] = $c+1; }
+      for ($c=0; $c<$maxReviewNum; $c++) {
+        $in = rand(0, count($itemIds)-1);
+
+        $review = array(
+          'user_name' => 'User'.$ui,
+          'item_id' => $itemIds[$in],
+          'point' => rand(1,5),
+        );
+        $this->create($review);
+
+        unset($itemIds[$in]);
+        $itemIds = array_values($itemIds);
+      }
+    }
+  }
+
+  private function reflectReviewsToItemTable()
+  {
+    $itemTable = $this->getServiceLocator()->get('Application\Model\ItemModelTable');
+    $reviewTable = $this->getReviewTable();
+
+    $items = $itemTable->fetchAll();
+    foreach ($items as $ik => $iv) {
+      $reviews = $reviewTable->getReviewsByItemId(+$iv->id);
+      $pointAve = 0.0;
+      $reviewCnt = 0;
+      if (count($reviews) != 0) {
+        foreach ($reviews as $rk => $review) {
+          $pointAve += floatval($review->point);
+          $reviewCnt++;
+        }
+        $pointAve /= floatval($reviewCnt);
+        $pointAve = round($pointAve, 2);
+      }
+      $iv->review_num = $reviewCnt;
+      $iv->review_avg = $pointAve;
+      $itemTable->saveItem($iv);
+    }
+  }
+
+
+
+
+
+
+
+
 
   public function create($data)
   {
@@ -109,7 +172,7 @@ class ReviewRestfulController extends AbstractRvrController
         'user_name' => $row->user_name,
         'user_age' => $row->user_age,
         'user_sex' => $row->user_sex,
-        'item_code' => $row->item_code,
+        'item_id' => $row->item_id,
         'item_name' => $row->item_name,
         'store_name' => $row->store_name,
         'url_item' => $row->url_item,

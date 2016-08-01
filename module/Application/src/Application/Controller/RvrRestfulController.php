@@ -12,6 +12,7 @@ class RvrRestfulController extends AbstractRvrController
   protected $itemTable;
   protected $reviewTable;
   protected $inputsTable;
+  protected $itemMatchTable;
 
   public function indexAction() { return new ViewModel(); }
 
@@ -29,6 +30,10 @@ class RvrRestfulController extends AbstractRvrController
   public function getInputsTable() {
     if(!$this->inputsTable) { $this->inputsTable = $this->getServiceLocator()->get('Application\Model\InputsModelTable'); }
     return $this->inputsTable;
+  }
+  public function getItemMatchTable() {
+    if(!$this->itemMatchTable) { $this->itemMatchTable = $this->getServiceLocator()->get('Application\Model\ItemMatchModelTable'); }
+    return $this->itemMatchTable;
   }
   /* end get db tables reference */
 
@@ -90,10 +95,12 @@ class RecommendCreator
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
     $reps = $this->calcReputationFromGazeInfoAll($gis);
+    $repsSim = $this->calcReptationSimilarity($reps);
 
     return array(
       'gis' => $gis,
       'reps' => $reps,
+      'sim' => $repsSim,
     );
   }
 
@@ -200,6 +207,17 @@ class RecommendCreator
   }
 
 
-  // 
+  //
+  protected function calcReptationSimilarity($_reps)
+  {
+    $imt = $this->rvrCtrl->getItemMatchTable();
+    foreach ($_reps as $rKey => $rep) {
+      $sims = $imt->getItemMatches(intval($rKey));
+      foreach ($sims as $k => $v) {
+        if (array_key_exists(intval($v['matched_item_id']), $_reps)) { continue; }
+
+      }
+    }
+  }
   /* end Recommendation */
 }
