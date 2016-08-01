@@ -260,7 +260,7 @@ class RecommendCreator
 
 
   //
-  protected function calcReptationSimilarity($_reps)
+  protected function calcReptationSimilarity($_reps, $maxCnt = 3)
   {
     $imt = $this->rvrCtrl->getItemMatchTable();
     $rt = $this->rvrCtrl->getReviewTable();
@@ -284,7 +284,18 @@ class RecommendCreator
 
     arsort($rankings);
 
-    return $rankings;
+    $result = array();
+    $cnt = 0;
+    foreach ($rankings as $rk => $rv) {
+      $result[] = array(
+        'itemId' => $rk,
+        'score' => $rv,
+      );
+      $cnt++;
+      if ($cnt >= $maxCnt) { break; }
+    }
+
+    return $result;
   }
   /* end Recommendation */
 }
