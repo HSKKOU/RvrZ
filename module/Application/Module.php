@@ -27,6 +27,9 @@ use Application\Model\InputsModelTable;
 use Application\Model\UserModel;
 use Application\Model\UserModelTable;
 
+use Application\Model\ItemMatchModel;
+use Application\Model\ItemMatchModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -116,6 +119,18 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new UserModel());
             return new TableGateway('users', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\ItemMatchModelTable' => function($sm){
+            $tableGateway = $sm->get('ItemMatchModelTableGateway');
+            $table = new ItemMatchModelTable($tableGateway);
+            return $table;
+          },
+          'ItemMatchModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ItemMatchModel());
+            return new TableGateway('item_match', $dbAdapter, null, $resultSetPrototype);
           },
         )
       );

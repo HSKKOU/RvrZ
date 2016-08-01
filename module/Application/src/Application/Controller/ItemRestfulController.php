@@ -5,21 +5,23 @@ use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
+use Application\Model\ItemMatchModel;
 
 class ItemRestfulController extends AbstractRvrController
 {
   protected $itemTable;
+  protected $itemMatchesTable;
 
-  public function getItemTable()
-  {
-    if(!$this->itemTable)
-    {
-      $sm = $this->getServiceLocator();
-      $this->itemTable = $sm->get('Application\Model\ItemModelTable');
-    }
-
+  // get Table
+  public function getItemTable() {
+    if(!$this->itemTable) { $this->itemTable = $this->getServiceLocator()->get('Application\Model\ItemModelTable'); }
     return $this->itemTable;
   }
+  public function getItemMatchTable() {
+    if(!$this->itemMatchesTable) { $this->itemMatchesTable = $this->getServiceLocator()->get('Application\Model\ItemMatchModelTable'); }
+    return $this->itemMatchesTable;
+  }
+  // end get Tables
 
   public function getList()
   {
@@ -28,6 +30,11 @@ class ItemRestfulController extends AbstractRvrController
 
   public function get($id)
   {
+    if ($id == 'updateMatch') {
+      $this->updateItemSimilarTable();
+      return $this->makeSuccessJson('update Item Matches Table');
+    }
+
     $gotModel = $this->getItemTable()->getItem($id);
     return $this->makeSuccessJson(array(
         'id' => $gotModel->id,
@@ -42,6 +49,53 @@ class ItemRestfulController extends AbstractRvrController
       )
     );
   }
+
+
+
+  private function updateItemSimilarTable()
+  {
+    $it = $this->getItemTable();
+    $imt = $this->getItemMatchTable();
+
+    $items = $it->fetchAll()->buffer();
+    $items2 = $it->fetchAll()->buffer();
+
+    foreach ($items as $item) {
+      foreach ($items2 as $item2) {
+        if ($item->id == $item2->id) { continue; }
+        $s = $this->calcItemSimilarity();
+        $ima = array(
+          'item_id' => $item->id,
+          'matched_item_id' => $item2->id,
+          'similarity' => $s,
+        );
+        $im = new ItemMatchModel();
+        $im->exchangeArray($ima);
+        $imt->saveItemMatch($im);
+      }
+    }
+
+    die;
+  }
+
+  private function calcItemSimilarity()
+  {
+    // TODO: implement dataset dreation
+    return rand(1, 10000) / 11000;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   public function create($data)
   {
