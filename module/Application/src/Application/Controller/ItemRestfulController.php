@@ -62,7 +62,7 @@ class ItemRestfulController extends AbstractRvrController
 
     foreach ($items as $item) {
       foreach ($items2 as $item2) {
-        if ($item->id == $item2->id) { continue; }
+        if ($item->id >= $item2->id) { continue; }
         $s = $this->calcItemSimilarity();
         $ima = array(
           'item_id' => $item->id,
@@ -74,8 +74,6 @@ class ItemRestfulController extends AbstractRvrController
         $imt->saveItemMatch($im);
       }
     }
-
-    die;
   }
 
   private function calcItemSimilarity()
