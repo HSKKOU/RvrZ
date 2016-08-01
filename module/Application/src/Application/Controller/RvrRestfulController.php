@@ -288,7 +288,7 @@ class RecommendCreator
     $cnt = 0;
     foreach ($rankings as $rk => $rv) {
       $result[] = array(
-        'itemId' => $rk,
+        'itemInfo' => $this->getItemInfo($rk),
         'score' => $rv,
       );
       $cnt++;
@@ -296,6 +296,13 @@ class RecommendCreator
     }
 
     return $result;
+  }
+
+  private function getItemInfo($id)
+  {
+    $itemTable = $this->rvrCtrl->getItemTable();
+    $item = $itemTable->getItem($id);
+    return $item->exchangeToArray();
   }
   /* end Recommendation */
 }
