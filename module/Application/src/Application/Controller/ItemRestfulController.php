@@ -30,11 +30,6 @@ class ItemRestfulController extends AbstractRvrController
 
   public function get($id)
   {
-    if ($id == 'updateMatch') {
-      $this->updateItemSimilarTable();
-      return $this->makeSuccessJson('update Item Matches Table');
-    }
-
     $gotModel = $this->getItemTable()->getItem($id);
     return $this->makeSuccessJson(array(
         'id' => $gotModel->id,
@@ -48,38 +43,6 @@ class ItemRestfulController extends AbstractRvrController
         'genre_id' => $gotModel->genre_id,
       )
     );
-  }
-
-
-
-  private function updateItemSimilarTable()
-  {
-    $it = $this->getItemTable();
-    $imt = $this->getItemMatchTable();
-
-    $items = $it->fetchAll()->buffer();
-    $items2 = $it->fetchAll()->buffer();
-
-    foreach ($items as $item) {
-      foreach ($items2 as $item2) {
-        if ($item->id >= $item2->id) { continue; }
-        $s = $this->calcItemSimilarity();
-        $ima = array(
-          'item_id' => $item->id,
-          'matched_item_id' => $item2->id,
-          'similarity' => $s,
-        );
-        $im = new ItemMatchModel();
-        $im->exchangeArray($ima);
-        $imt->saveItemMatch($im);
-      }
-    }
-  }
-
-  private function calcItemSimilarity()
-  {
-    // TODO: implement dataset dreation
-    return rand(1, 10000) / 11000;
   }
 
 

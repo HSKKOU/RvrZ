@@ -5,6 +5,7 @@ use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
+use Application\Model\ItemMatchModel;
 use Application\Model\InputsModel;
 
 class RvrRestfulController extends AbstractRvrController
@@ -48,6 +49,11 @@ class RvrRestfulController extends AbstractRvrController
 
   public function get($user_id)
   {
+    if ($user_id == 'updateItemMatchDataSet') {
+      $this->updateItemMatchDataSet();
+      return $this->makeSuccessJson('updated DataSet');
+    }
+
     $recomCrtr = new RC01($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
     return $this->makeSuccessJson($recoms);
@@ -62,6 +68,50 @@ class RvrRestfulController extends AbstractRvrController
 
 
   /* Utilities */
+  private function updateItemMatchDataSet()
+  {
+    $it = $this->getItemTable();
+    $imt = $this->getItemMatchTable();
+    $rt = $this->getReviewTable();
+
+    // TODO: should modify for memory leak
+    $scoreByItemUser = array();
+    $rowSet = $rt->fetchAll();
+    while ($row = $rowSet->current()) {
+      $itemId = $row->item_id;
+      $userName = $row->user_name;
+      if (!array_key_exists($itemId, $scoreByItemUser)) { $scoreByItemUser[$itemId] = array(); }
+      $scoreByItemUser[$itemId][$userName] = $row->point;
+      $rowSet->next();
+    }
+
+    // TODO: should modify for memory leak
+    foreach ($scoreByItemUser as $iid1 => $item1) {
+      foreach ($scoreByItemUser as $iid2 => $item2) {
+        if ($iid1 >= $iid2) { continue; }
+        $s = $this->calcItemSimilarity($item1, $item2);
+        $ima = array(
+          'item_id' => $iid1,
+          'matched_item_id' => $iid2,
+          'similarity' => $s,
+        );
+        $im = new ItemMatchModel();
+        $im->exchangeArray($ima);
+        $imt->saveItemMatch($im);
+      }
+    }
+  }
+
+  private function calcItemSimilarity($item1, $item2)
+  {
+    $simSquareSum = 0.0;
+    foreach ($item1 as $un1 => $p1) {
+      if (!array_key_exists($un1, $item2)) { continue; }
+      $simSquareSum += floatval(pow($p1-$item2[$un1], 2));
+    }
+
+    return 1.0 / (1.0 + sqrt($simSquareSum));
+  }
   /* end Utilities */
 
 
@@ -211,11 +261,11 @@ class RecommendCreator
   protected function calcReptationSimilarity($_reps)
   {
     $imt = $this->rvrCtrl->getItemMatchTable();
+    $rt = $this->rvrCtrl->getReviewTable();
     foreach ($_reps as $rKey => $rep) {
       $sims = $imt->getItemMatches(intval($rKey));
       foreach ($sims as $k => $v) {
         if (array_key_exists(intval($v['matched_item_id']), $_reps)) { continue; }
-
       }
     }
   }
