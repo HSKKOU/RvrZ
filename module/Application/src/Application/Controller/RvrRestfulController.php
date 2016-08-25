@@ -91,7 +91,8 @@ class RvrRestfulController extends AbstractRvrController
     foreach ($scoreByItemUser as $iid1 => $item1) {
       foreach ($scoreByItemUser as $iid2 => $item2) {
         if ($iid1 >= $iid2) { continue; }
-        $s = $this->calcItemSimilarity($item1, $item2);
+        // $s = $this->calcItemSimilarityEuclid($item1, $item2);
+        $s = $this->calcItemSimilarityPearson($item1, $item2);
         $ima = array(
           'item_id' => $iid1,
           'matched_item_id' => $iid2,
@@ -104,7 +105,7 @@ class RvrRestfulController extends AbstractRvrController
     }
   }
 
-  private function calcItemSimilarity($item1, $item2)
+  private function calcItemSimilarityEuclid($item1, $item2)
   {
     $simSquareSum = 0.0;
     foreach ($item1 as $un1 => $p1) {
@@ -113,6 +114,35 @@ class RvrRestfulController extends AbstractRvrController
     }
 
     return 1.0 / (1.0 + sqrt($simSquareSum));
+  }
+
+  private function calcItemSimilarityPearson($item1, $item2)
+  {
+    $i1Sum = 0.0;
+    $i2Sum = 0.0;
+    $i1Sp2 = 0.0;
+    $i2Sp2 = 0.0;
+    $i1xi2Sum = 0.0;
+    $cnt = 0;
+    foreach ($item1 as $un1 => $p1) {
+      if (!array_key_exists($un1, $item2)) { continue; }
+      $p2 = $item2[$un1];
+      $i1Sum += floatval($p1);
+      $i2Sum += floatval($p2);
+      $i1Sp2 += floatval(pow($p1, 2));
+      $i2Sp2 += floatval(pow($p2, 2));
+      $i1xi2Sum += floatval($p1 * $p2);
+      $cnt++;
+    }
+
+    if ($cnt == 0) { return 0.0; }
+
+    $num = $i1xi2Sum - $i1Sum * $i2Sum / floatval($cnt);
+    $den = sqrt(($i1Sp2 - pow($i1Sum, 2) / floatval($cnt)) * ($i2Sp2 - pow($i2Sum, 2) / floatval($cnt)));
+
+    if ($den < 0.00000001) { return 0.0; }
+
+    return abs($num / $den);
   }
   /* end Utilities */
 
