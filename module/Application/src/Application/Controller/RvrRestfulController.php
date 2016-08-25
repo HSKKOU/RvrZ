@@ -54,7 +54,9 @@ class RvrRestfulController extends AbstractRvrController
       return $this->makeSuccessJson('updated DataSet');
     }
 
-    $recomCrtr = new RC01($this, $user_id);
+    // $recomCrtr = new RC01OnlyTime($this, $user_id);
+    // $recomCrtr = new RC01OnlyDist($this, $user_id);
+    $recomCrtr = new RC01All($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
     return $this->makeSuccessJson($recoms);
   }
@@ -118,14 +120,78 @@ class RvrRestfulController extends AbstractRvrController
 }
 
 
+
+
+
+
 /* Recommendation */
 class RC01 extends RecommendCreator
 {
   protected $maxStar = 5.0;
   protected $minStar = 1.0;
+
+  protected function calcReputationFromGazeInfo($_gis){ return array(); }
 }
 
-class RecommendCreator
+class RC01OnlyTime extends RC01
+{
+  protected function calcReputationFromGazeInfo($_gis)
+  {
+    $reps = array();
+
+    $mm = $this->selectMaxMinValueWithInGazeInfo($_gis, 'totalTime');
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
+      $nCl = $this->normalizeData($_gis[$i]['totalTime'], $mm['max'], $mm['min']);
+      $reps[$i] = $this->applyStarValue($nCl);
+    }
+
+    return $reps;
+  }
+}
+
+class RC01OnlyDist extends RC01
+{
+  protected function calcReputationFromGazeInfo($_gis)
+  {
+    $reps = array();
+
+    $mm = $this->selectMaxMinValueWithInGazeInfo($_gis, 'aveDist');
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
+      $nCl = $this->normalizeDataInv($_gis[$i]['aveDist'], $mm['max'], $mm['min']);
+      $reps[$i] = $this->applyStarValue($nCl);
+    }
+
+    return $reps;
+  }
+}
+
+class RC01All extends RC01
+{
+  protected function calcReputationFromGazeInfo($_gis)
+  {
+    $reps = array();
+
+    $mmTT = $this->selectMaxMinValueWithInGazeInfo($_gis, 'totalTime');
+    $mmAD = $this->selectMaxMinValueWithInGazeInfo($_gis, 'aveDist');
+    foreach ($_gis as $i => $val) {
+      if (!isset($_gis[$i])) { continue; }
+      $nClTT = $this->normalizeData($_gis[$i]['totalTime'], $mmTT['max'], $mmTT['min']);
+      $nClAD = $this->normalizeDataInv($_gis[$i]['aveDist'], $mmAD['max'], $mmAD['min']);
+      $nCl = sqrt($nClTT * $nClAD);
+      $reps[$i] = $this->applyStarValue($nCl);
+    }
+
+    return $reps;
+  }
+}
+
+
+
+
+
+abstract class RecommendCreator
 {
   private $user_id;
   private $rvrCtrl;
@@ -144,7 +210,7 @@ class RecommendCreator
   {
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
-    $reps = $this->calcReputationFromGazeInfoAll($gis);
+    $reps = $this->calcReputationFromGazeInfo($gis);
     $repsSim = $this->calcReptationSimilarity($reps);
 
     // return array(
@@ -191,16 +257,8 @@ class RecommendCreator
     return $gazeInfos;
   }
 
-  /* only total time */
-  protected function calcReputationFromGazeInfoTotalTime($_gis) { return calcReputationFromGazeInfoBase($_gis, 'totalTime'); }
-  /* only distance */
-  protected function calcReputationFromGazeInfoAveDist($_gis) { return calcReputationFromGazeInfoBase($_gis, 'aveDist'); }
-
-  /* calc reputation method base */
-  protected function calcReputationFromGazeInfoBase($_gis, $_column_name)
+  protected function selectMaxMinValueWithInGazeInfo($_gis, $_column_name)
   {
-    $reps = array();
-
     $clMax = 0;
     $clMin = 100000000000;
     // for ($i=0; $i<count($_gis); $i++) {
@@ -212,51 +270,12 @@ class RecommendCreator
       if ($giTT < $clMin) { $clMin = $giTT; }
     }
 
-    // for ($i=0; $i<count($_gis); $i++) {
-    foreach ($_gis as $i => $val) {
-      if (!isset($_gis[$i])) { continue; }
-      $gi = $_gis[$i];
-      $giTT = $gi[$_column_name];
-      $nCl = ($giTT - $clMin) / ($clMax - $clMin);
-      $reps[$i] = ($this->maxStar - $this->minStar) * $nCl + $this->minStar;
-    }
-
-    return $reps;
+    return array("max" => $clMax, "min" => $clMin);
   }
 
-  /* totalTime and distance */
-  protected function calcReputationFromGazeInfoAll($_gis)
-  {
-    $reps = array();
+  protected function applyStarValue($_normalized_val) { return ($this->maxStar - $this->minStar) * $_normalized_val + $this->minStar; }
 
-    $timeMax = 0;
-    $timeMin = 100000000000;
-    $distMax = 0;
-    $distMin = 100000000000;
-    // for ($i=0; $i<count($_gis); $i++) {
-    foreach ($_gis as $i => $val) {
-      if (!isset($_gis[$i])) { continue; }
-      $gi = $_gis[$i];
-      $giTT = $gi['totalTime'];
-      $giAD = $gi['aveDist'];
-      if ($giTT > $timeMax) { $timeMax = $giTT; }
-      if ($giTT < $timeMin) { $timeMin = $giTT; }
-      if ($giAD > $distMax) { $distMax = $giAD; }
-      if ($giAD < $distMin) { $distMin = $giAD; }
-    }
-
-    // for ($i=0; $i<count($_gis); $i++) {
-    foreach ($_gis as $i => $val) {
-      if (!isset($_gis[$i])) { continue; }
-      $gi = $_gis[$i];
-      $giTT = $gi['totalTime'];
-      $giAD = $gi['aveDist'];
-      $nCl = sqrt(($giTT - $timeMin) / ($timeMax - $timeMin) * (1 - ($giAD - $distMin) / ($distMax - $distMin)) );
-      $reps[$i] = ($this->maxStar - $this->minStar) * $nCl + $this->minStar;
-    }
-
-    return $reps;
-  }
+  protected abstract function calcReputationFromGazeInfo($_gis);
 
 
   //
@@ -304,5 +323,9 @@ class RecommendCreator
     $item = $itemTable->getItem($id);
     return $item->exchangeToArray();
   }
+
+
+  protected function normalizeData($_di, $_dMax, $_dMin) { return ($_di - $_dMin) / ($_dMax - $_dMin); }
+  protected function normalizeDataInv($_di, $_dMax, $_dMin) { return 1.0 - ($_di - $_dMin) / ($_dMax - $_dMin); }
   /* end Recommendation */
 }
