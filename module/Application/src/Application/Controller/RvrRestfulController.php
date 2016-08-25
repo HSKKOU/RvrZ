@@ -124,6 +124,7 @@ class RvrRestfulController extends AbstractRvrController
     $i2Sp2 = 0.0;
     $i1xi2Sum = 0.0;
     $cnt = 0;
+    $denEps = 0.00000001;
     foreach ($item1 as $un1 => $p1) {
       if (!array_key_exists($un1, $item2)) { continue; }
       $p2 = $item2[$un1];
@@ -140,7 +141,7 @@ class RvrRestfulController extends AbstractRvrController
     $num = $i1xi2Sum - $i1Sum * $i2Sum / floatval($cnt);
     $den = sqrt(($i1Sp2 - pow($i1Sum, 2) / floatval($cnt)) * ($i2Sp2 - pow($i2Sum, 2) / floatval($cnt)));
 
-    if ($den < 0.00000001) { return 0.0; }
+    if ($den < $denEps) { return 0.0; }
 
     return abs($num / $den);
   }
