@@ -143,7 +143,7 @@ class RvrRestfulController extends AbstractRvrController
 
     if ($den < $denEps) { return 0.0; }
 
-    return abs($num / $den);
+    return ($num / $den + 1) / 2;
   }
   /* end Utilities */
 
