@@ -33,7 +33,7 @@ class InputsModel
       $sqSum = 0;
       $userPosSp = explode(',', $this->user_positionV3);
       $itemPosSp = explode(',', $this->gaze_item_positionV3);
-      for ($i=0; $i<2; $i++) { $sqSum += pow((intval($userPosSp[$i]) - intval($itemPosSp[$i])), 2); }
+      for ($i=0; $i<=2; $i++) { $sqSum += pow((intval($userPosSp[$i]) - intval($itemPosSp[$i])), 2); }
       $this->distance = sqrt($sqSum);
     }
 
