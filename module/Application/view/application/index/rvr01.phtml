@@ -6,6 +6,7 @@
         <div class="img"></div>
         <div class="rep">
           <select class="rep_select">
+            <option value="0" "selected">-</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -33,11 +34,24 @@ var \$itemTable = \$("#item_table"),
     canSendFlag = false, items = [],
     userId = $("#user_id").val();
 
+
+getRecoms();
+
+$("#sendBtn").on("click", function(){
+  if(!canSendFlag){ return; }
+  canSendFlag = false;
+  postReputations();
+});
+
+
+
+
+
 function setRecommendations(_items){
   for(var i in _items){
     var item = _items[i];
     var \$itemCell = \$itemCellTmp.clone();
-    log("item", item);
+    // log("item", item);
     \$itemCell.attr("data-id", item["id"]);
     \$itemCell.find(".title").text(item["title"]);
     \$itemCell.find(".img").css({"background": "url(\""+item["img"]+"\") no-repeat center center / contain"});
@@ -59,6 +73,7 @@ function getRecoms() {
     "success": function(_data){
       log("success", _data);
       setRecommendations(_data["items"]);
+      canSendFlag = true;
     },
     "failure": function(_data){
       log("failure", _data);
@@ -68,33 +83,24 @@ function getRecoms() {
 
 
 
-
-
-
-$(function main(){
-  getRecoms();
-})();
-
-
-
-$("#sendBtn").on("click", function(){
-  log("a");
-  var id = 1
-      query = {"text": "testest"};
-  // post({
-  //   "url": "http://localhost/app/test",
-  //   "type": "post",
-  //   "query": query,
-  //   "callback": function(_result, _data){
-  //     log(_result, _data);
-  //     if(!_result){ $("#a1").html(_data["response"]); }
-  //   }
-  // });
-});
-
-
-
-
+function postReputations() {
+  log("post reputation");
+  return;
+  var url = "http://localhost/app/reps/"+userId,
+      query = {"reps": []};
+  post({
+    "url": url,
+    "type": "post",
+    "query": query,
+    "success": function(_data){
+      log("success", _data);
+      setRecommendations(_data["items"]);
+    },
+    "failure": function(_data){
+      log("failure", _data);
+    }
+  });
+}
 
 
 
