@@ -1,37 +1,13 @@
-body {
-    padding-top: 60px;
-    padding-bottom: 40px;
-}
+html,body{width: 100%;height: 100%;}
+.container{position: relative;padding-bottom: 80px;width: 100%;height: 100%;box-sizing: border-box;}
 
-.zf-green {
-    color: #68b604;
-}
+.bb{box-sizing: border-box;}
 
-.btn-success {
-  background-color: #57a900;
-  background-image: -moz-linear-gradient(top, #70d900, #57a900);
-  background-image: -ms-linear-gradient(top, #70d900, #57a900);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#70d900), to(#57a900));
-  background-image: -webkit-linear-gradient(top, #70d900, #57a900);
-  background-image: -o-linear-gradient(top, #70d900, #57a900);
-  background-image: linear-gradient(top, #70d900, #57a900);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#70d900', endColorstr='#57a900', GradientType=0);
-}
+#item_table{border: 2px solid #333;padding: 20px;width: 98%;height: 100%;overflow-x: hidden;overflow-y: auto;}
+  #item_table > .item_table_cell{float: left;padding: 10px;width: 300px;height: 300px;}
+    #item_table > .item_table_cell > .contents{border: 1px solid #333;padding: 5px;width: 100%;height: 100%;}
+      #item_table > .item_table_cell .title{}
+      #item_table > .item_table_cell .img{width: 200px;height: 200px;}
+      #item_table > .item_table_cell .rep{}
 
-.btn-success:hover,
-.btn-success:active,
-.btn-success.active,
-.btn-success.disabled,
-.btn-success[disabled] {
-  background-color: #57a900;
-}
-
-.btn-success:active, .btn-success.active {
-  background-color: #57a900;
-}
-
-div.container a.brand {
-    background: url("../img/zf2-logo.png") no-repeat scroll 0 10px transparent;
-    margin-left: 0;
-    padding: 8px 20px 12px 40px;
-}
+#sendBtn{float: right;margin: 20px 100px 0 0;width: 120px;height: 40px;font-size: 18px;}

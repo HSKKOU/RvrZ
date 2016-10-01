@@ -1,0 +1,124 @@
+<div id="item_table" class="bb">
+  <!-- <div class="item_table_row template"> -->
+    <div class="item_table_cell template bb">
+      <div class="contents bb">
+        <div class="title"></div>
+        <div class="img"></div>
+        <div class="rep">
+          <select class="rep_select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  <!-- </div> -->
+</div>
+
+<input id="user_id" type="hidden" value="<?= $this->user_id ?>" />
+
+<button id="sendBtn">送信</button>
+
+<?php
+
+$this->inlineScript()->appendScript(
+<<<__END__
+
+var \$itemTable = \$("#item_table"),
+    // \$itemRowTmp = \$itemTable.find(".item_table_row").removeClass("template").remove(),
+    \$itemCellTmp = \$itemTable.find(".item_table_cell").removeClass("template").remove(),
+    canSendFlag = false, items = [],
+    userId = $("#user_id").val();
+
+function setRecommendations(_items){
+  for(var i in _items){
+    var item = _items[i];
+    var \$itemCell = \$itemCellTmp.clone();
+    log("item", item);
+    \$itemCell.attr("data-id", item["id"]);
+    \$itemCell.find(".title").text(item["title"]);
+    \$itemCell.find(".img").css({"background": "url(\""+item["img"]+"\") no-repeat center center / contain"});
+    \$itemTable.append(\$itemCell);
+  }
+}
+
+
+function getRecoms() {
+  var url = "http://localhost/app/rvr/"+userId,
+      query = {};
+
+  log("get recoms", url);
+
+  post({
+    "url": url,
+    "type": "get",
+    "query": query,
+    "success": function(_data){
+      log("success", _data);
+      setRecommendations(_data["items"]);
+    },
+    "failure": function(_data){
+      log("failure", _data);
+    }
+  });
+}
+
+
+
+
+
+
+$(function main(){
+  getRecoms();
+})();
+
+
+
+$("#sendBtn").on("click", function(){
+  log("a");
+  var id = 1
+      query = {"text": "testest"};
+  // post({
+  //   "url": "http://localhost/app/test",
+  //   "type": "post",
+  //   "query": query,
+  //   "callback": function(_result, _data){
+  //     log(_result, _data);
+  //     if(!_result){ $("#a1").html(_data["response"]); }
+  //   }
+  // });
+});
+
+
+
+
+
+
+
+
+
+
+
+function log(_){ console.log.apply(console, arguments); }
+function post(_opt){
+  var url = _opt["url"],
+      type = _opt["type"],
+      query = _opt["query"],
+      successCB = _opt["success"],
+      failureCB = _opt["failure"];
+  $.ajax({
+    "type": type,
+    "url": url,
+    "data": JSON.stringify(query),
+    "contentType": "application/json",
+    "dataType": "json",
+    "success": function(_data){ successCB(_data["data"]) },
+    "failure": function(_data){ failureCB({"statusCode": _data["status"], "response": _data["responseText"]}); }
+  });
+}
+
+__END__
+);

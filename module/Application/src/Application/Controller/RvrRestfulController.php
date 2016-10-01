@@ -15,8 +15,6 @@ class RvrRestfulController extends AbstractRvrController
   protected $inputsTable;
   protected $itemMatchTable;
 
-  private $DEBUG = true;
-
   public function indexAction() { return new ViewModel(); }
 
 
@@ -56,17 +54,25 @@ class RvrRestfulController extends AbstractRvrController
       return $this->makeSuccessJson('updated DataSet');
     }
 
+    // for DEBUG
+    if (true) {
+      $items = array();
+      for ($i=0; $i<50; $i++) {
+        $items[] = array(
+          "id" => $i,
+          "title" => "Item " . $i,
+          "img" => "/img/index.png",
+        );
+      }
+      return $this->makeSuccessJson(array("items" => $items));
+    }
+
     // $recomCrtr = new RC01OnlyTime($this, $user_id);
     // $recomCrtr = new RC01OnlyDist($this, $user_id);
     $recomCrtr = new RC01All($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
 
-    if ($DEBUG) {
-      // for debug
-      return $this->makeSuccessJson($recoms);
-    } else {
-      // return new ViewModel($recoms);
-    }
+    return $this->makeSuccessJson($recoms);
   }
   /* end Restful API methods */
 

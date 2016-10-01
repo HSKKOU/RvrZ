@@ -1,5 +1,17 @@
-<div id="a1"></div>
-<input id="button01" type="button" />
+<div id="item_table">
+  <?= $this->recoms ?>
+  <div class="item_table_row template">
+    <div class="item_table_cell template">
+      <div class="title"></div>
+      <div class="img"></div>
+      <div class="rep">
+        <input class="rep_input" maxlength="1" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="sendBtn">送信</button>
 
 <?php
 

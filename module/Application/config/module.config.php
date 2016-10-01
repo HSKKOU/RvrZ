@@ -13,19 +13,32 @@ return array(
     'router' => array(
         'routes' => array(
             'home' => array(
-                'type' => 'Zend\Mvc\Router\Http\Literal',
-                'options' => array(
-                    'route'    => '/',
-                    'defaults' => array(
-                        'controller' => 'Application\Controller\Index',
-                        'action'     => 'index',
-                    ),
+              'type' => 'Zend\Mvc\Router\Http\Literal',
+              'options' => array(
+                'route'    => '/',
+                'defaults' => array(
+                  '__NAMESPACE__' => 'Application\Controller',
                 ),
+              ),
+              'may_terminate' => true,
+              'child_routes' => array(
+                'default' => array(
+                  'type'    => 'Segment',
+                  'options' => array(
+                    'route'    => ':controller[/:user_id][/]',
+                    'constraints' => array(
+                      'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                      'id' => '[0-9]+',
+                    ),
+                    'defaults' => array(
+                      'controller' => 'Index',
+                      'action'     => 'index',
+                    ),
+                  ),
+                ),
+              ),
             ),
-            // The following is a route to simplify getting started creating
-            // new controllers and actions without needing to create a new
-            // module. Simply drop new controllers in, and you can access them
-            // using the path /application/:controller/:action
+
             'app' => array(
                 'type'    => 'Literal',
                 'options' => array(
@@ -73,6 +86,8 @@ return array(
     ),
     'controllers' => array(
         'invokables' => array(
+            'Application\Controller\Rvr01' => Controller\Rvr01Controller::class,
+
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
             'Application\Controller\Item' => Controller\ItemRestfulController::class,
@@ -90,7 +105,8 @@ return array(
         'exception_template'       => 'error/index',
         'template_map' => array(
             'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
-            'app/index/index' => __DIR__ . '/../view/application/index/index.phtml',
+            'app/index/index'         => __DIR__ . '/../view/application/index/index.phtml',
+            'application/rvr01/index'         => __DIR__ . '/../view/application/index/rvr01.phtml',
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
             'error/index'             => __DIR__ . '/../view/error/index.phtml',
         ),
