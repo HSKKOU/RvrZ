@@ -15,6 +15,8 @@ class RvrRestfulController extends AbstractRvrController
   protected $inputsTable;
   protected $itemMatchTable;
 
+  private $DEBUG = true;
+
   public function indexAction() { return new ViewModel(); }
 
 
@@ -58,7 +60,13 @@ class RvrRestfulController extends AbstractRvrController
     // $recomCrtr = new RC01OnlyDist($this, $user_id);
     $recomCrtr = new RC01All($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
-    return $this->makeSuccessJson($recoms);
+
+    if ($DEBUG) {
+      // for debug
+      return $this->makeSuccessJson($recoms);
+    } else {
+      // return new ViewModel($recoms);
+    }
   }
   /* end Restful API methods */
 
