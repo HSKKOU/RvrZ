@@ -39,6 +39,9 @@ class ReviewRestfulController extends AbstractRvrController
     } else if ($id == 'reflectReviews') {
       $this->reflectReviewsToItemTable();
       return $this->makeSuccessJson('reflected reviews');
+    } else if ($id == 'import') {
+      $result = $this->importReviewData();
+      return $this->makeSuccessJson($result);
     }
 
     $gotModel = $this->getReviewTable()->getReview($id);
@@ -112,7 +115,34 @@ class ReviewRestfulController extends AbstractRvrController
   }
 
 
+  private function importReviewData()
+  {
+    $file_path = "F:\\review_tmp\\ichiba04_review201201_20140221.tsv";
+    if (!($fp = fopen($file_path, "r"))) {
+      return "cannot open file";
+    }
 
+    $filesize = filesize($file_path);
+    $cnt = 0;
+    $size = 0;
+
+    $output = "";
+
+    while (!feof($fp)) {
+      if ($cnt > 0) { break; }
+      $line = fgets($fp);
+      $size = strlen(trim($line));
+      $cnt++;
+
+      mb_convert_encoding($line, "SJIS", "UTF-8");
+
+      $output .= $line;
+    }
+
+    fclose($fp);
+
+    return "success import item data : " . $output;
+  }
 
 
 

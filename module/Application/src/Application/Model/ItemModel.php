@@ -4,6 +4,7 @@ namespace Application\Model;
 class ItemModel
 {
   public $id;
+  public $item_code;
   public $name;
   public $price;
   public $description;
@@ -16,6 +17,7 @@ class ItemModel
   public function exchangeArray($data)
   {
     $this->id = (isset($data['id']))? $data['id']:0;
+    $this->item_code = (isset($data['item_code']))? $data['item_code']:NULL;
     $this->name = (isset($data['name']))? $data['name']:NULL;
     $this->price = (isset($data['price']))? $data['price']:NULL;
     $this->description = (isset($data['description']))? $data['description']:NULL;
@@ -30,6 +32,7 @@ class ItemModel
   {
     return array(
       'id' => $this->id,
+      'item_code' => $this->item_code,
       'name' => $this->name,
       'price' => $this->price,
       'description' => $this->description,

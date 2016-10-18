@@ -34,6 +34,7 @@ class ItemModelTable
   {
     $data = array(
       'name' => $itemModel->name,
+      'item_code' => $itemModel->item_code,
       'price' => $itemModel->price,
       'description' => $itemModel->description,
       'url_item' => $itemModel->url_item,

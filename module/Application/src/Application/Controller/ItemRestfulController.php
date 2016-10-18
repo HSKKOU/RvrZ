@@ -30,9 +30,14 @@ class ItemRestfulController extends AbstractRvrController
 
   public function get($id)
   {
+    if ($id == "import") {
+      $result = $this->importItemData();
+      return $this->makeSuccessJson(array($result));
+    }
     $gotModel = $this->getItemTable()->getItem($id);
     return $this->makeSuccessJson(array(
         'id' => $gotModel->id,
+        'item_code' => $gotModel->item_code,
         'name' => $gotModel->name,
         'price' => $gotModel->price,
         'description' => $gotModel->description,
@@ -99,6 +104,60 @@ class ItemRestfulController extends AbstractRvrController
 
 
 
+  private function importItemData()
+  {
+    for ($i=1; $i<=261; $i++) {
+      $this->importItemDataForEachFile($i);
+    }
+
+    return "success import item data[" . $cnt . "] : " . $line;
+  }
+
+  private function importItemDataForEachFile($file_number)
+  {
+    $fnStr = "00".$file_number;
+    $fnStr = substr($fnStr, -3);
+    $file_path = "F:\items\ichiba01_item" . $fnStr . "_20140221.tsv";
+    if (!($fp = fopen($file_path, "r"))) { return "cannot open file"; }
+
+    $filesize = filesize($file_path);
+    $cnt = 0;
+    $size = 0;
+
+    $output = "";
+
+    while (!feof($fp)) {
+      $line = fgets($fp);
+      $size = strlen(trim($line));
+      $cnt++;
+
+      $output = explode("\t", $line);
+
+      if ($output[6] == 'http://image.rakuten.co.jp/interiorkataoka/cabinet/top/ct-elure.jpg') { continue; }
+      if (preg_match('/noimage/', $output[6])) { continue; }
+      if ($output[7] == '0' || $output[8] == '0.00') { continue; }
+
+      $itemInfo = array(
+        'name' => $output[0],
+        'item_code' => $output[1],
+        'price' => $output[2],
+        'description' => $output[3],
+        'url_item' => $output[5],
+        'url_image' => $output[6],
+        'review_num' => $output[7],
+        'review_avg' => $output[8],
+        'genre_id' => $output[10],
+      );
+      $this->create($itemInfo);
+    }
+
+    fclose($fp);
+  }
+
+
+
+
+
   /* Utilities */
   public function getListRaw()
   {
@@ -108,6 +167,7 @@ class ItemRestfulController extends AbstractRvrController
     foreach ($rowSet as $row) {
       $data[] = array(
         'id' => $row->id,
+        'item_code' => $row->item_code,
         'name' => $row->name,
         'price' => $row->price,
         'description' => $row->description,
