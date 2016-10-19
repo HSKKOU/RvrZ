@@ -13,6 +13,10 @@
 
 <button id="sendBtn">送信</button>
 
+<h1>Import Item Data</h1>
+<button id="importButton">IMPORT</button>
+<div id="importRes"></div>
+
 <?php
 
 $this->inlineScript()->appendScript(
@@ -59,6 +63,27 @@ $("#button01").on("click", function(){
       if(!_result){ $("#a1").html(_data["response"]); }
     }
   });
+});
+
+var isImporting = false;
+$("#importButton").on("click", function(){
+  if(isImporting) { return; }
+  isImporting = true;
+  var importFunc = (function(_i){
+    if(_i > 261){ return; }
+    post({
+      "url": "http://localhost/app/item/import_" + _i,
+      "type": "get",
+      "callback": function(_result, _data){
+        log(_result, _data);
+        if(_result){
+          $("#importRes").append($("<div>"+_data['data']+"</div>"));
+        }
+        importFunc(_i+1);
+      }
+    });
+  });
+  importFunc(1);
 });
 
 __END__

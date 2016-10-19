@@ -30,9 +30,9 @@ class ItemRestfulController extends AbstractRvrController
 
   public function get($id)
   {
-    if ($id == "import") {
-      $result = $this->importItemData();
-      return $this->makeSuccessJson(array($result));
+    if (preg_match('/import/', $id)) {
+      $result = $this->importItemData($id);
+      return $this->makeSuccessJson($result);
     }
     $gotModel = $this->getItemTable()->getItem($id);
     return $this->makeSuccessJson(array(
@@ -104,13 +104,13 @@ class ItemRestfulController extends AbstractRvrController
 
 
 
-  private function importItemData()
+  private function importItemData($idStr)
   {
-    for ($i=1; $i<=261; $i++) {
-      $this->importItemDataForEachFile($i);
-    }
+    $file_id_split = explode("_", $idStr);
+    $file_id = $file_id_split[1];
+    $cnt = $this->importItemDataForEachFile($file_id);
 
-    return "success import item data[" . $cnt . "] : " . $line;
+    return "success import item data[" . $file_id . "] : " . $cnt . "records";
   }
 
   private function importItemDataForEachFile($file_number)
@@ -127,15 +127,17 @@ class ItemRestfulController extends AbstractRvrController
     $output = "";
 
     while (!feof($fp)) {
+      // if ($cnt > 10) { break; }
       $line = fgets($fp);
       $size = strlen(trim($line));
-      $cnt++;
 
       $output = explode("\t", $line);
 
       if ($output[6] == 'http://image.rakuten.co.jp/interiorkataoka/cabinet/top/ct-elure.jpg') { continue; }
       if (preg_match('/noimage/', $output[6])) { continue; }
       if ($output[7] == '0' || $output[8] == '0.00') { continue; }
+
+      $cnt++;
 
       $itemInfo = array(
         'name' => $output[0],
@@ -152,6 +154,8 @@ class ItemRestfulController extends AbstractRvrController
     }
 
     fclose($fp);
+
+    return $cnt;
   }
 
 
