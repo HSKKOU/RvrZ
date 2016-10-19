@@ -30,6 +30,9 @@ use Application\Model\UserModelTable;
 use Application\Model\ItemMatchModel;
 use Application\Model\ItemMatchModelTable;
 
+use Application\Model\ReputationModel;
+use Application\Model\ReputationModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -132,6 +135,19 @@ class Module
             $resultSetPrototype->setArrayObjectPrototype(new ItemMatchModel());
             return new TableGateway('item_match', $dbAdapter, null, $resultSetPrototype);
           },
+
+          'Application\Model\ReputationModelTable' => function($sm){
+            $tableGateway = $sm->get('ReputationModelTableGateway');
+            $table = new ReputationModelTable($tableGateway);
+            return $table;
+          },
+          'ReputationModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ReputationModel());
+            return new TableGateway('reputations', $dbAdapter, null, $resultSetPrototype);
+          },
+
         )
       );
     }

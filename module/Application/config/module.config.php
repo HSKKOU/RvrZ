@@ -25,7 +25,7 @@ return array(
                 'default' => array(
                   'type'    => 'Segment',
                   'options' => array(
-                    'route'    => ':controller[/:user_id][/]',
+                    'route'    => '[:controller][/:user_id][/]',
                     'constraints' => array(
                       'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
                       'id' => '[0-9]+',
@@ -87,6 +87,7 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Application\Controller\Rvr01' => Controller\Rvr01Controller::class,
+            'Application\Controller\Import' => Controller\ImportController::class,
 
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
@@ -95,6 +96,7 @@ return array(
             'Application\Controller\Inputs' => Controller\InputsRestfulController::class,
             'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
             'Application\Controller\User' => Controller\UserRestfulController::class,
+            'Application\Controller\Rep' => Controller\ReputationRestfulController::class,
         ),
     ),
     'view_manager' => array(
@@ -107,6 +109,7 @@ return array(
             'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
             'app/index/index'         => __DIR__ . '/../view/application/index/index.phtml',
             'application/rvr01/index'         => __DIR__ . '/../view/application/index/rvr01.phtml',
+            'application/import/index'         => __DIR__ . '/../view/application/index/import.phtml',
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
             'error/index'             => __DIR__ . '/../view/error/index.phtml',
         ),

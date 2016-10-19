@@ -31,7 +31,7 @@ $this->inlineScript()->appendScript(
 var \$itemTable = \$("#item_table"),
     // \$itemRowTmp = \$itemTable.find(".item_table_row").removeClass("template").remove(),
     \$itemCellTmp = \$itemTable.find(".item_table_cell").removeClass("template").remove(),
-    canSendFlag = false, items = [],
+    canSendFlag = false, items = [], reps = [],
     userId = $("#user_id").val();
 
 
@@ -48,14 +48,27 @@ $("#sendBtn").on("click", function(){
 
 
 function setRecommendations(_items){
+  items = _items;
   for(var i in _items){
-    var item = _items[i];
-    var \$itemCell = \$itemCellTmp.clone();
-    // log("item", item);
-    \$itemCell.attr("data-id", item["id"]);
-    \$itemCell.find(".title").text(item["title"]);
-    \$itemCell.find(".img").css({"background": "url(\""+item["img"]+"\") no-repeat center center / contain"});
-    \$itemTable.append(\$itemCell);
+    (function(_i){
+      var item = _items[_i];
+      var \$itemCell = \$itemCellTmp.clone();
+      // log("item", item);
+      \$itemCell.attr("data-id", item["id"]);
+      \$itemCell.find(".title").text(item["title"]);
+      \$itemCell.find(".img").css({"background": "url(\""+item["img"]+"\") no-repeat center center / contain"});
+
+      \$itemCell.find("select.rep_select").on("change", function(){
+        var itemRep = $(this).find("option:selected").val();
+        reps[_i] = {
+          "item_id": +item["id"],
+          "reputation": +itemRep
+        };
+        log("items selected [item" + _i + "] " + itemRep);
+      });
+
+      \$itemTable.append(\$itemCell);
+    })(i);
   }
 }
 
@@ -85,23 +98,24 @@ function getRecoms() {
 
 function postReputations() {
   log("post reputation");
-  return;
-  var url = "http://localhost/app/reps/"+userId,
-      query = {"reps": []};
+  var url = "http://localhost/app/rep/",
+      query = {};
+
+  query["reps"] = reps;
+  query["user_id"] = +userId;
+  log(query);
   post({
     "url": url,
     "type": "post",
     "query": query,
     "success": function(_data){
       log("success", _data);
-      setRecommendations(_data["items"]);
     },
     "failure": function(_data){
       log("failure", _data);
     }
   });
 }
-
 
 
 

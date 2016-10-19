@@ -1,0 +1,104 @@
+<h1>Import Item Data</h1>
+<button id="importButton">IMPORT</button>
+<div id="importRes"></div>
+
+<h1>Import Review Data</h1>
+<button id="importReviewButton">IMPORT</button>
+<div id="importReviewRes"></div>
+
+<?php
+
+$this->inlineScript()->appendScript(
+<<<__END__
+
+function log(_){ console.log.apply(console, arguments); }
+function post(_opt){
+  var url = _opt["url"],
+      type = _opt["type"],
+      query = _opt["query"],
+      callback = _opt["callback"];
+  $.ajax({
+    "type": type,
+    "url": url,
+    "data": JSON.stringify(query),
+    "contentType": "application/json",
+    "dataType": "json",
+    "success": function(_data){ callback(true, _data); },
+    "error": function(_data){ callback(false, {"statusCode": _data["status"], "response": _data["responseText"]}); }
+  });
+}
+
+$("#button01").on("click", function(){
+  $("#a1").text($("#a1").text() + "a");
+  log("a");
+  var id = 1
+      query = {"text": "testest"};
+  // post({
+  //   "url": "http://localhost/app/test",
+  //   "type": "get",
+  //   "query": query,
+  //   "callback": function(_result, _data){
+  //     log(_result, _data);
+  //     if(!_result){ $("#a1").html(_data["response"]); }
+  //   }
+  // });
+
+  post({
+    "url": "http://localhost/app/test",
+    "type": "post",
+    "query": query,
+    "callback": function(_result, _data){
+      log(_result, _data);
+      if(!_result){ $("#a1").html(_data["response"]); }
+    }
+  });
+});
+
+var isImporting = false;
+$("#importButton").on("click", function(){
+  if(isImporting) { return; }
+  isImporting = true;
+  var importFunc = (function(_i){
+    if(_i > 261){ return; }
+    $("#importRes").append($("<div>[start import] item data file" + _i + "</div>"));
+    post({
+      "url": "http://localhost/app/item/import_" + _i,
+      "type": "get",
+      "callback": function(_result, _data){
+        log(_result, _data);
+        if(_result){
+          $("#importRes").append($("<div>[finish import] "+_data['data']+"</div>"));
+        }
+        importFunc(_i+1);
+      }
+    });
+  });
+  importFunc(2);
+});
+
+
+
+var isImportingReview = false;
+$("#importReviewButton").on("click", function(){
+  if(isImportingReview) { return; }
+  isImportingReview = true;
+  var importFunc = (function(_i){
+    if(_i > 16){ return; }
+    $("#importReviewRes").append($("<div>[start import] Review data file" + _i + "</div>"));
+    post({
+      "url": "http://localhost/app/review/import_" + _i,
+      "type": "get",
+      "callback": function(_result, _data){
+        log(_result, _data);
+        if(_result){
+          $("#importReviewRes").append($("<div>[finish import] "+_data['data']+"</div>"));
+        }
+        importFunc(_i+1);
+      }
+    });
+  });
+  importFunc(1);
+});
+
+__END__
+);
