@@ -3,7 +3,7 @@
 return array(
   'db' => array(
     'driver' => 'Pdo',
-    'dsn' => 'mysql:host=localhost;dbname=recomvr;charset=utf8;',
+    'dsn' => 'mysql:host=localhost;dbname=vrshopping2;charset=utf8;',
   ),
   'service_manager' => array(
     'factories' => array(
