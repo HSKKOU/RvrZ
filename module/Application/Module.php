@@ -30,6 +30,9 @@ use Application\Model\UserModelTable;
 use Application\Model\ItemMatchModel;
 use Application\Model\ItemMatchModelTable;
 
+use Application\Model\ItemGenreModel;
+use Application\Model\ItemGenreModelTable;
+
 use Application\Model\ReputationModel;
 use Application\Model\ReputationModelTable;
 
@@ -134,6 +137,18 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemMatchModel());
             return new TableGateway('item_match', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\ItemGenreModelTable' => function($sm){
+            $tableGateway = $sm->get('ItemGenreModelTableGateway');
+            $table = new ItemGenreModelTable($tableGateway);
+            return $table;
+          },
+          'ItemGenreModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ItemGenreModel());
+            return new TableGateway('item_genres', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ReputationModelTable' => function($sm){

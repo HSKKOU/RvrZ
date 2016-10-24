@@ -92,6 +92,7 @@ return array(
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
             'Application\Controller\Item' => Controller\ItemRestfulController::class,
+            'Application\Controller\ItemGenre' => Controller\ItemGenreRestfulController::class,
             'Application\Controller\Review' => Controller\ReviewRestfulController::class,
             'Application\Controller\Inputs' => Controller\InputsRestfulController::class,
             'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
