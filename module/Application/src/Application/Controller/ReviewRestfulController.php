@@ -39,9 +39,6 @@ class ReviewRestfulController extends AbstractRvrController
     } else if ($id == 'reflectReviews') {
       $this->reflectReviewsToItemTable();
       return $this->makeSuccessJson('reflected reviews');
-    } else if (preg_match('/import/', $id)) {
-      $result = $this->importReviewData($id);
-      return $this->makeSuccessJson($result);
     }
 
     $gotModel = $this->getReviewTable()->getReview($id);
@@ -102,69 +99,6 @@ class ReviewRestfulController extends AbstractRvrController
   }
 
 
-
-
-
-  private function importReviewData($idStr)
-  {
-    $file_id_split = explode("_", $idStr);
-    $file_id = $file_id_split[1];
-    $cnt = $this->importReviewDataForEachFile($file_id);
-
-    return "success import item data[" . $file_id . "] : " . $cnt . "records";
-  }
-
-  private function importReviewDataForEachFile($file_number)
-  {
-    $fnStr = "0".$file_number;
-    $fnStr = substr($fnStr, -2);
-    $file_path = "F:\\reviews\ichiba04_review2012" . $fnStr . "_20140221.tsv";
-    if (!($fp = fopen($file_path, "r"))) { return "cannot open file"; }
-
-    $filesize = filesize($file_path);
-    $cnt = 0;
-    $size = 0;
-
-    $output = "";
-
-    while (!feof($fp)) {
-      // if ($cnt > 10) { break; }
-      $line = fgets($fp);
-      $size = strlen(trim($line));
-
-      $output = explode("\t", $line);
-
-      $cnt++;
-
-      $user_sex = 2;
-      if ($output[0] != "購入者さん") { $user_sex = $output[2]; }
-
-      $reviewInfo = array(
-        'user_name' => $output[0],
-        'user_age' => $output[1],
-        'user_sex' => $user_sex,
-        'item_id' => $output[3],
-        'item_name' => $output[4],
-        'store_name' => $output[5],
-        'url_item' => $output[6],
-        'item_genre_id' => $output[7],
-        'item_price' => $output[8],
-        'purchase_flag' => $output[9],
-        'content' => $output[10],
-        'objective' => $output[11],
-        'frequency' => $output[12],
-        'point' => $output[13],
-        'review_title' => $output[14],
-        'review_content' => $output[15],
-        'review_date' => $output[16],
-      );
-      $this->create($reviewInfo);
-    }
-
-    fclose($fp);
-
-    return $cnt;
-  }
 
 
 
