@@ -48,22 +48,9 @@ class ReviewModelTable
   {
     $data = array(
       'user_name' => $reviewModel->user_name,
-      'user_age' => $reviewModel->user_age,
-      'user_sex' => $reviewModel->user_sex,
       'item_id' => $reviewModel->item_id,
-      'item_name' => $reviewModel->item_name,
-      'store_name' => $reviewModel->store_name,
-      'url_item' => $reviewModel->url_item,
       'item_genre_id' => $reviewModel->item_genre_id,
-      'item_price' => $reviewModel->item_price,
-      'purchase_flag' => $reviewModel->purchase_flag,
-      'content' => $reviewModel->content,
-      'objective' => $reviewModel->objective,
-      'frequency' => $reviewModel->frequency,
       'point' => $reviewModel->point,
-      'review_title' => $reviewModel->review_title,
-      'review_content' => $reviewModel->review_content,
-      'review_date' => $reviewModel->review_date,
     );
 
     $id = (int)$reviewModel->id;

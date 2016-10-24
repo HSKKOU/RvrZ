@@ -48,22 +48,9 @@ class ReviewRestfulController extends AbstractRvrController
     return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
       'user_name' => $gotModel->user_name,
-      'user_age' => $gotModel->user_age,
-      'user_sex' => $gotModel->user_sex,
       'item_id' => $gotModel->item_id,
-      'item_name' => $gotModel->item_name,
-      'store_name' => $gotModel->store_name,
-      'url_item' => $gotModel->url_item,
       'item_genre_id' => $gotModel->item_genre_id,
-      'item_price' => $gotModel->item_price,
-      'purchase_flag' => $gotModel->purchase_flag,
-      'content' => $gotModel->content,
-      'objective' => $gotModel->objective,
-      'frequency' => $gotModel->frequency,
       'point' => $gotModel->point,
-      'review_title' => $gotModel->review_title,
-      'review_content' => $gotModel->review_content,
-      'review_date' => $gotModel->review_date,
     ));
   }
 
@@ -235,22 +222,9 @@ class ReviewRestfulController extends AbstractRvrController
       $data[] = array(
         'id' => $row->id,
         'user_name' => $row->user_name,
-        'user_age' => $row->user_age,
-        'user_sex' => $row->user_sex,
         'item_id' => $row->item_id,
-        'item_name' => $row->item_name,
-        'store_name' => $row->store_name,
-        'url_item' => $row->url_item,
         'item_genre_id' => $row->item_genre_id,
-        'item_price' => $row->item_price,
-        'purchase_flag' => $row->purchase_flag,
-        'content' => $row->content,
-        'objective' => $row->objective,
-        'frequency' => $row->frequency,
         'point' => $row->point,
-        'review_title' => $row->review_title,
-        'review_content' => $row->review_content,
-        'review_date' => $row->review_date,
       );
     }
 
