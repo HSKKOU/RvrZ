@@ -100,7 +100,7 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
-            return new TableGateway('reviews', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('reviews_01', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\InputsModelTable' => function($sm){

@@ -8,6 +8,13 @@ use Application\Model\ItemModel;
 use Application\Model\ItemMatchModel;
 use Application\Model\InputsModel;
 
+use Application\Model\ReviewModel;
+use Application\Model\ReviewModelTable;
+
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
+
+
 class RvrRestfulController extends AbstractRvrController
 {
   protected $itemTable;
@@ -50,8 +57,11 @@ class RvrRestfulController extends AbstractRvrController
   public function get($user_id)
   {
     if ($user_id == 'updateItemMatchDataSet') {
-      $this->updateItemMatchDataSet();
+      // $this->updateItemMatchDataSet_0001();
       return $this->makeSuccessJson('updated DataSet');
+    } else if ($user_id == 'updateItemReviewDataSet') {
+      // $this->updateItemReviewDataSet();
+      return $this->makeSuccessJson('updated Review in Item DataSet');
     }
 
     // for DEBUG
@@ -119,15 +129,40 @@ class RvrRestfulController extends AbstractRvrController
     }
   }
 
-  private function calcItemSimilarityEuclid($item1, $item2)
+  private function updateItemMatchDataSet_0001()
   {
-    $simSquareSum = 0.0;
-    foreach ($item1 as $un1 => $p1) {
-      if (!array_key_exists($un1, $item2)) { continue; }
-      $simSquareSum += floatval(pow($p1-$item2[$un1], 2));
+    $it = $this->getItemTable();
+    $imt = $this->getItemMatchTable();
+    $rts = array();
+    $sm = $this->getServiceLocator();
+
+    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+    $resultSetPrototype = new ResultSet();
+    $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
+
+    for ($i=0; $i<12; $i++) {
+      $rn = substr('0'.($i+1), -2, 2);
+      $reviewTable = new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype);
+      $rts[] = $reviewTable;
     }
 
-    return 1.0 / (1.0 + sqrt($simSquareSum));
+    $items = $it->fetchAll();
+    foreach ($items as $ik1 => $item1) {
+      foreach ($items as $ik2 => $item2) {
+        if (+$item1->id >= +$item2->id) { continue; }
+        $s = $this->calcItemSimilarityPearson($item1, $item2);
+        $ima = array(
+          'item_id' => +$item1->id,
+          'matched_item_id' => +$item2->id,
+          'similarity' => $s,
+        );
+        $im = new ItemMatchModel();
+        $im->exchangeArray($ima);
+        // $imt->saveItemMatch($im);
+        var_dump($im);die;
+      }
+      break;
+    }
   }
 
   private function calcItemSimilarityPearson($item1, $item2)
@@ -162,7 +197,54 @@ class RvrRestfulController extends AbstractRvrController
   /* end Utilities */
 
 
+  private function updateItemReviewDataSet()
+  {
+    $sm = $this->getServiceLocator();
+
+    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+    $resultSetPrototype = new ResultSet();
+    $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
+
+    $rts = array();
+    for ($i=0; $i<12; $i++) {
+      $rn = substr('0'.($i+1), -2, 2);
+      $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
+      $rts[] = $reviewTable;
+    }
+
+    $it = $this->getItemTable();
+    $itemSet = $it->fetchAll();
+    while ($item = $itemSet->current()) {
+      $itemCode = $item->item_code;
+      $reviews = array();
+      for ($i=0; $i<count($rts); $i++) {
+        $rt = $rts[$i];
+        $rs = $rt->getReviewsByItemId($itemCode);
+        if (count($rs) == 0) { continue; }
+        $reviews = array_merge($rs, $reviews);
+      }
+
+      $review_num = count($reviews);
+      $review_avg = 0.0;
+      foreach ($reviews as $rk => $rv) {
+        $review_avg += $rv->point;
+      }
+      if ($review_num > 0) { $review_avg /= $review_num; }
+
+      $item->review_num = $review_num;
+      $item->review_avg = $review_avg;
+
+      $it->saveItem($item);
+
+      $itemSet->next();
+    }
+  }
 }
+
+
+
+
+
 
 
 

@@ -32,7 +32,7 @@ class ReviewModelTable
 
   public function getReviewsByItemId($item_id)
   {
-    $item_id = (int)$item_id;
+    $item_id = $item_id;
     $rowSet = $this->tableGateway->select(array('item_id' => $item_id));
 
     $retReviews = array();
