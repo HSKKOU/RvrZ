@@ -57,10 +57,10 @@ class RvrRestfulController extends AbstractRvrController
   public function get($user_id)
   {
     if ($user_id == 'updateItemMatchDataSet') {
-      // $this->updateItemMatchDataSet_0001();
+      $this->updateItemMatchDataSet_0001();
       return $this->makeSuccessJson('updated DataSet');
     } else if ($user_id == 'updateItemReviewDataSet') {
-      // $this->updateItemReviewDataSet();
+      $this->updateItemReviewDataSet();
       return $this->makeSuccessJson('updated Review in Item DataSet');
     }
 
@@ -235,6 +235,8 @@ class RvrRestfulController extends AbstractRvrController
       $item->review_avg = $review_avg;
 
       $it->saveItem($item);
+
+      // var_dump($item);die;
 
       $itemSet->next();
     }
