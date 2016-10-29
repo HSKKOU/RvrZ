@@ -2,6 +2,7 @@
 namespace Application\Model;
 
 use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\Sql;
 
 class ItemModelTable
 {
@@ -28,6 +29,25 @@ class ItemModelTable
     }
 
     return $row;
+  }
+
+  public function getItemsByRandom($num)
+  {
+    $select = $this->tableGateway->getSql()->select();
+    $select->order(array( new \Zend\Db\Sql\Expression("RAND()") ));
+    $select->limit($num);
+
+    // $sqlStr = $select->getSqlString();
+    // var_dump($sqlStr);die;
+    $rowSet = $this->tableGateway->selectWith($select);
+
+    $ret = array();
+    while ($row = $rowSet->current()) {
+      $ret[] = $row->exchangeToArray();
+      $rowSet->next();
+    }
+
+    return $ret;
   }
 
   public function saveItem(ItemModel $itemModel)
