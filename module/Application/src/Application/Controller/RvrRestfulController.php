@@ -206,7 +206,7 @@ class RvrRestfulController extends AbstractRvrController
     $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
 
     $rts = array();
-    for ($i=0; $i<12; $i++) {
+    for ($i=0; $i<36; $i++) {
       $rn = substr('0'.($i+1), -2, 2);
       $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
       $rts[] = $reviewTable;
