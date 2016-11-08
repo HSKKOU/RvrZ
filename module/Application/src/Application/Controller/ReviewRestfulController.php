@@ -5,6 +5,10 @@ use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\View\Model\JsonModel;
 
 use Application\Model\ReviewModel;
+use Application\Model\ReviewModelTable;
+
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
 
 class ReviewRestfulController extends AbstractRvrController
 {
@@ -39,6 +43,9 @@ class ReviewRestfulController extends AbstractRvrController
     } else if ($id == 'reflectReviews') {
       $this->reflectReviewsToItemTable();
       return $this->makeSuccessJson('reflected reviews');
+    } else if (preg_match('/removeOldReviewsBySameUser/', $id)) {
+      $this->removeOldReviewsBySameUser($id);
+      return $this->makeSuccessJson('remove reviews by same users');
     }
 
     $gotModel = $this->getReviewTable()->getReview($id);
@@ -95,6 +102,65 @@ class ReviewRestfulController extends AbstractRvrController
       $iv->review_num = $reviewCnt;
       $iv->review_avg = $pointAve;
       $itemTable->saveItem($iv);
+    }
+  }
+
+  private function removeOldReviewsBySameUser($_idStr)
+  {
+    $db_id_split = explode("_", $_idStr);
+    $db_id = $db_id_split[1];
+
+    $sm = $this->getServiceLocator();
+
+    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+    $resultSetPrototype = new ResultSet();
+    $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
+
+    $rts = array();
+    for ($i=0; $i<36; $i++) {
+      $rn = substr('0'.($i+1), -2, 2);
+      $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
+      $rts[] = $reviewTable;
+    }
+
+    $ri = +$db_id;
+
+    // $reviews = $rts[$ri]->fetchAll();
+    for ($rId=0; $rId<2000000; $rId++) {
+      try {
+        $rts[$ri]->getReview($rId);
+      } catch (\Exception $e) {
+        continue;
+      }
+
+      $rUserName = $review->user_name;
+      $rItemId = $review->item_id;
+
+      $newest_review;
+      $newest_rt_key;
+      $is_found = false;
+      for ($j=0; $j<36; $j++) {
+        if ($ri == $j) { continue; }
+        $matchRevs = $rts[$j]->getReviewsByItemIdAndUserName($rItemId, $rUserName);
+        if (count($matchRevs) == 0) {
+          unset($matchRevs);
+          continue;
+        }
+        $newest_review = $matchRevs[count($matchRevs)-1];
+        $newest_rt_key = $j;
+        $is_found = true;
+        unset($matchRevs);
+      }
+
+      if (!$is_found) { continue; }
+
+      for ($j=0; $j<36; $j++) {
+        if ($j == $newest_rt_key) { continue; }
+        $rts[$j]->deleteReviewsByItemIdAndUserName($rItemId, $rUserName);
+      }
+
+      unset($newest_review);
+      unset($matchRevs);
     }
   }
 

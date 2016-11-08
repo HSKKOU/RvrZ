@@ -56,8 +56,9 @@ class RvrRestfulController extends AbstractRvrController
 
   public function get($user_id)
   {
-    if ($user_id == 'updateItemMatchDataSet') {
-      $this->updateItemMatchDataSet_0001();
+    if (preg_match('/updateItemMatchDataSet/', $user_id)) {
+      $itemIdSp = explode("_", $user_id);
+      $this->updateItemMatchDataSet_0001($itemIdSp[1], $itemIdSp[2]);
       return $this->makeSuccessJson('updated DataSet');
     } else if ($user_id == 'updateItemReviewDataSet') {
       $this->updateItemReviewDataSet();
@@ -96,6 +97,7 @@ class RvrRestfulController extends AbstractRvrController
   /* Utilities */
   private function updateItemMatchDataSet()
   {
+    return;
     $it = $this->getItemTable();
     $imt = $this->getItemMatchTable();
     $rt = $this->getReviewTable();
@@ -129,44 +131,86 @@ class RvrRestfulController extends AbstractRvrController
     }
   }
 
-  private function updateItemMatchDataSet_0001()
+  private function updateItemMatchDataSet_0001($itemId1, $itemId2)
   {
+    if (+$itemId1 == 1) { return; }
+    if (+$itemId1 >= +$itemId2) { return; }
+
     $it = $this->getItemTable();
     $imt = $this->getItemMatchTable();
-    $rts = array();
+
+    $item1 = $it->getItem(+$itemId1);
+    $item2 = $it->getItem(+$itemId2);
+
+    $calcRes = $this->calcItemSimilarityPearson($item1, $item2);
+
+    if (+$calcRes['num'] == 0 || +$calcRes['sim'] == 0) { return; }
+    $ima = array(
+      'item_id' => +$itemId1,
+      'matched_item_id' => +$itemId2,
+      'similarity' => +$calcRes['sim'],
+      'users_num' => +$calcRes['num'],
+    );
+    $im = new ItemMatchModel();
+    $im->exchangeArray($ima);
+    $imt->saveItemMatch($im);
+  }
+
+  private function createReviewSetByItemIds($iid1, $iid2)
+  {
+
+  }
+
+  private function calcItemSimilarityPearson($item1, $item2)
+  {
     $sm = $this->getServiceLocator();
 
     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
     $resultSetPrototype = new ResultSet();
     $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
 
-    for ($i=0; $i<12; $i++) {
+    $rts = array();
+    for ($i=0; $i<36; $i++) {
       $rn = substr('0'.($i+1), -2, 2);
-      $reviewTable = new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype);
+      $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
       $rts[] = $reviewTable;
     }
 
-    $items = $it->fetchAll();
-    foreach ($items as $ik1 => $item1) {
-      foreach ($items as $ik2 => $item2) {
-        if (+$item1->id >= +$item2->id) { continue; }
-        $s = $this->calcItemSimilarityPearson($item1, $item2);
-        $ima = array(
-          'item_id' => +$item1->id,
-          'matched_item_id' => +$item2->id,
-          'similarity' => $s,
-        );
-        $im = new ItemMatchModel();
-        $im->exchangeArray($ima);
-        // $imt->saveItemMatch($im);
-        var_dump($im);die;
-      }
-      break;
-    }
-  }
+    $itemId1 = $item1->item_code;
+    $itemId2 = $item2->item_code;
 
-  private function calcItemSimilarityPearson($item1, $item2)
-  {
+    $item1Revs = array();
+    $item1RevsCnt = 0;
+    for ($i=0; $i<36; $i++) {
+      $revs = $rts[$i]->getReviewsByItemId($itemId1);
+      for ($ri=0; $ri<count($revs); $ri++) {
+        $rev = $revs[$ri];
+        $item1Revs[$rev->user_name] = $rev->point;
+        $item1RevsCnt++;
+      }
+      unset($revs);
+      unset($rev);
+      if ($item1RevsCnt >= $item1->review_num) { break; }
+    }
+    $item2Revs = array();
+    $item2RevsCnt = 0;
+    for ($i=0; $i<36; $i++) {
+      $revs = $rts[$i]->getReviewsByItemId($itemId2);
+      for ($ri=0; $ri<count($revs); $ri++) {
+        $rev = $revs[$ri];
+        $item2Revs[$rev->user_name] = $rev->point;
+        $item2RevsCnt++;
+      }
+      unset($revs);
+      unset($rev);
+      if ($item2RevsCnt >= $item2->review_num) { break; }
+    }
+
+    unset($sm);
+    unset($dbAdapter);
+    unset($resultSetPrototype);
+    unset($rts);
+
     $i1Sum = 0.0;
     $i2Sum = 0.0;
     $i1Sp2 = 0.0;
@@ -174,9 +218,10 @@ class RvrRestfulController extends AbstractRvrController
     $i1xi2Sum = 0.0;
     $cnt = 0;
     $denEps = 0.00000001;
-    foreach ($item1 as $un1 => $p1) {
-      if (!array_key_exists($un1, $item2)) { continue; }
-      $p2 = $item2[$un1];
+
+    foreach ($item1Revs as $un => $p1) {
+      if (!array_key_exists($un, $item2Revs)) { continue; }
+      $p2 = $item2Revs[$un];
       $i1Sum += floatval($p1);
       $i2Sum += floatval($p2);
       $i1Sp2 += floatval(pow($p1, 2));
@@ -185,14 +230,35 @@ class RvrRestfulController extends AbstractRvrController
       $cnt++;
     }
 
-    if ($cnt == 0) { return 0.0; }
+    unset($item1Revs);
+    unset($item2Revs);
+
+    if ($cnt == 0) {
+      return array(
+        'sim' => 0.0,
+        'num' => 0,
+      );
+    } else if ($cnt == 1 && $i1Sum == $i2Sum) {
+      return array(
+        'sim' => 1.0,
+        'num' => 1,
+      );
+    }
 
     $num = $i1xi2Sum - $i1Sum * $i2Sum / floatval($cnt);
     $den = sqrt(($i1Sp2 - pow($i1Sum, 2) / floatval($cnt)) * ($i2Sp2 - pow($i2Sum, 2) / floatval($cnt)));
 
-    if ($den < $denEps) { return 0.0; }
+    if ($den < $denEps) {
+      return array(
+        'sim' => 0.0,
+        'num' => $cnt,
+      );
+    }
 
-    return ($num / $den + 1) / 2;
+    return array(
+      'sim' => ($num / $den + 1) / 2,
+      'num' => $cnt,
+    );
   }
   /* end Utilities */
 
@@ -216,27 +282,27 @@ class RvrRestfulController extends AbstractRvrController
     $itemSet = $it->fetchAll();
     while ($item = $itemSet->current()) {
       $itemCode = $item->item_code;
-      $reviews = array();
+
+      $review_num = 0;
+      $review_avg = 0.0;
+
       for ($i=0; $i<count($rts); $i++) {
         $rt = $rts[$i];
         $rs = $rt->getReviewsByItemId($itemCode);
         if (count($rs) == 0) { continue; }
-        $reviews = array_merge($rs, $reviews);
+
+        foreach ($rs as $rsk => $rsv) { $review_avg += floatval($rsv->point); }
+        $review_num += count($rs);
       }
 
-      $review_num = count($reviews);
-      $review_avg = 0.0;
-      foreach ($reviews as $rk => $rv) {
-        $review_avg += $rv->point;
-      }
       if ($review_num > 0) { $review_avg /= $review_num; }
 
       $item->review_num = $review_num;
       $item->review_avg = $review_avg;
 
-      $it->saveItem($item);
-
       // var_dump($item);die;
+
+      $it->saveItem($item);
 
       $itemSet->next();
     }

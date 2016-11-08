@@ -42,6 +42,7 @@ class ItemMatchModelTable
       $matched = array(
         'matched_item_id' => $row->matched_item_id,
         'similarity' => $row->similarity,
+        'users_num' => $row->users_num,
       );
       if ($matched['matched_item_id'] == $item_id) { $matched['matched_item_id'] = $row->item_id; }
       $retMatches[] = $matched;
@@ -57,6 +58,7 @@ class ItemMatchModelTable
       'item_id' => $itemMatchModel->item_id,
       'matched_item_id' => $itemMatchModel->matched_item_id,
       'similarity' => $itemMatchModel->similarity,
+      'users_num' => $itemMatchModel->users_num,
     );
 
     $item_id = (int)$itemMatchModel->item_id;

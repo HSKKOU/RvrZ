@@ -32,8 +32,20 @@ class ReviewModelTable
 
   public function getReviewsByItemId($item_id)
   {
-    $item_id = $item_id;
     $rowSet = $this->tableGateway->select(array('item_id' => $item_id));
+
+    $retReviews = array();
+    while ($row = $rowSet->current()) {
+      $retReviews[] = $row;
+      $rowSet->next();
+    }
+
+    return $retReviews;
+  }
+
+  public function getReviewsByItemIdAndUserName($item_id, $user_name)
+  {
+    $rowSet = $this->tableGateway->select(array('item_id' => $item_id, 'user_name' => $user_name));
 
     $retReviews = array();
     while ($row = $rowSet->current()) {
@@ -68,5 +80,10 @@ class ReviewModelTable
   public function deleteReview($id)
   {
     return $this->tableGateway->delete(array('id' => (int)$id));
+  }
+
+  public function deleteReviewsByItemIdAndUserName($item_id, $user_name)
+  {
+    $this->tableGateway->delete(array('item_id' => $item_id, 'user_name' => $user_name));
   }
 }

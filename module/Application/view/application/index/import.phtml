@@ -6,6 +6,15 @@
 <button id="importReviewButton">IMPORT</button>
 <div id="importReviewRes"></div>
 
+<h1>Remove Same Reviews</h1>
+<button id="removeReviewButton">REMOVE</button>
+<div id="removeReviewRes"></div>
+
+<h1>Create Item Match</h1>
+<button id="createItemMatchButton">createItemMatch</button>
+<div id="createItemMatchRes"></div>
+
+
 <?php
 
 $this->inlineScript()->appendScript(
@@ -100,5 +109,55 @@ $("#importReviewButton").on("click", function(){
   importFunc(1);
 });
 
+var isRemovingReview = false;
+$("#removeReviewButton").on("click", function(){
+  if(isRemovingReview) { return; }
+  isRemovingReview = true;
+  var removeFunc = (function(_i){
+    if(_i > 35){ return; }
+    $("#removeReviewRes").append($("<div>[start remove] Review data db" + _i + "</div>"));
+    post({
+      "url": "http://localhost/app/review/removeOldReviewsBySameUser_" + _i,
+      "type": "get",
+      "callback": function(_result, _data){
+        log(_result, _data);
+        if(_result){
+          $("#removeReviewRes").append($("<div>[finish remove " + _i + "] "+_data['data']+"</div>"));
+        }
+        // removeFunc(_i+1);
+      }
+    });
+  });
+  removeFunc(0);
+});
+
+
+var isCreateItemMatch = false;
+$("#createItemMatchButton").on("click", function(){
+  $(".container").css({"overflow": "auto"});
+  if(isCreateItemMatch) { return; }
+  isCreateItemMatch = true;
+  var createItemMatchFunc = (function(_i1, _i2){
+    if(_i1 > 6994){ return; }
+    $("#createItemMatchRes").append($("<div>[start createItemMatch] Item" + _i1 + "," + _i2  + "</div>"));
+    post({
+      "url": "http://localhost/app/rvr/updateItemMatchDataSet_" + _i1 + "_" + _i2,
+      "type": "get",
+      "callback": function(_result, _data){
+        log(_result, _data);
+        if(_result){
+          $("#createItemMatchRes").append($("<div>[finish createItemMatch " + _i1 + "," + _i2 + "] "+_data['data']+"</div>"));
+        }
+        if(_i2 >= 6994){
+          _i1++;
+          _i2=1;
+          $("#createItemMatchRes").html("");
+        }
+        createItemMatchFunc(_i1, _i2+1);
+      }
+    });
+  });
+  createItemMatchFunc(2, 1);
+});
 __END__
 );
