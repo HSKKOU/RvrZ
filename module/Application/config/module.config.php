@@ -99,6 +99,7 @@ return array(
             'Application\Controller\User' => Controller\UserRestfulController::class,
             'Application\Controller\Rep' => Controller\ReputationRestfulController::class,
             'Application\Controller\ReviewUser' => Controller\ReviewUserRestfulController::class,
+            'Application\Controller\ItemSimElem' => Controller\ItemSimElemRestfulController::class,
         ),
     ),
     'view_manager' => array(

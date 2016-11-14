@@ -39,6 +39,9 @@ use Application\Model\ReputationModelTable;
 use Application\Model\ReviewUserModel;
 use Application\Model\ReviewUserModelTable;
 
+use Application\Model\ItemSimElemModel;
+use Application\Model\ItemSimElemModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -176,6 +179,18 @@ class Module
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ReviewUserModel());
             return new TableGateway('reviews_users_all01', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\ItemSimElemModelTable' => function($sm){
+            $tableGateway = $sm->get('ItemSimElemModelTableGateway');
+            $table = new ItemSimElemModelTable($tableGateway);
+            return $table;
+          },
+          'ItemSimElemModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ItemSimElemModel());
+            return new TableGateway('item_sim_elem', $dbAdapter, null, $resultSetPrototype);
           },
         )
       );
