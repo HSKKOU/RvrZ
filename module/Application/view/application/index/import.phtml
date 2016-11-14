@@ -138,7 +138,7 @@ $("#createItemMatchButton").on("click", function(){
   if(isCreateItemMatch) { return; }
   isCreateItemMatch = true;
   var createItemMatchFunc = (function(_i1, _i2){
-    if(_i1 > 6994){ return; }
+    if(_i1 > 6959){ return; }
     $("#createItemMatchRes").append($("<div>[start createItemMatch] Item" + _i1 + "," + _i2  + "</div>"));
     post({
       "url": "http://localhost/app/rvr/updateItemMatchDataSet_" + _i1 + "_" + _i2,
@@ -148,7 +148,7 @@ $("#createItemMatchButton").on("click", function(){
         if(_result){
           $("#createItemMatchRes").append($("<div>[finish createItemMatch " + _i1 + "," + _i2 + "] "+_data['data']+"</div>"));
         }
-        if(_i2 >= 6994){
+        if(_i2 >= 6959){
           _i1++;
           _i2=1;
           $("#createItemMatchRes").html("");

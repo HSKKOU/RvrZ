@@ -58,8 +58,8 @@ class RvrRestfulController extends AbstractRvrController
   {
     if (preg_match('/updateItemMatchDataSet/', $user_id)) {
       $itemIdSp = explode("_", $user_id);
-      $this->updateItemMatchDataSet_0001($itemIdSp[1], $itemIdSp[2]);
-      return $this->makeSuccessJson('updated DataSet');
+      $num = $this->updateItemMatchDataSet_0001($itemIdSp[1], $itemIdSp[2]);
+      return $this->makeSuccessJson('updated DataSet ' . $num);
     } else if ($user_id == 'updateItemReviewDataSet') {
       $this->updateItemReviewDataSet();
       return $this->makeSuccessJson('updated Review in Item DataSet');
@@ -133,8 +133,8 @@ class RvrRestfulController extends AbstractRvrController
 
   private function updateItemMatchDataSet_0001($itemId1, $itemId2)
   {
-    if (+$itemId1 == 1) { return; }
-    if (+$itemId1 >= +$itemId2) { return; }
+    if (+$itemId1 == 1) { return -1; }
+    if (+$itemId1 >= +$itemId2) { return -1; }
 
     $it = $this->getItemTable();
     $imt = $this->getItemMatchTable();
@@ -144,7 +144,7 @@ class RvrRestfulController extends AbstractRvrController
 
     $calcRes = $this->calcItemSimilarityPearson($item1, $item2);
 
-    if (+$calcRes['num'] == 0 || +$calcRes['sim'] == 0) { return; }
+    if (+$calcRes['num'] == 0 || +$calcRes['sim'] == 0) { return 0; }
     $ima = array(
       'item_id' => +$itemId1,
       'matched_item_id' => +$itemId2,
@@ -154,6 +154,8 @@ class RvrRestfulController extends AbstractRvrController
     $im = new ItemMatchModel();
     $im->exchangeArray($ima);
     $imt->saveItemMatch($im);
+
+    return +$calcRes['num'];
   }
 
   private function createReviewSetByItemIds($iid1, $iid2)
@@ -170,7 +172,7 @@ class RvrRestfulController extends AbstractRvrController
     $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
 
     $rts = array();
-    for ($i=0; $i<36; $i++) {
+    for ($i=0; $i<6; $i++) {
       $rn = substr('0'.($i+1), -2, 2);
       $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
       $rts[] = $reviewTable;
@@ -181,7 +183,7 @@ class RvrRestfulController extends AbstractRvrController
 
     $item1Revs = array();
     $item1RevsCnt = 0;
-    for ($i=0; $i<36; $i++) {
+    for ($i=0; $i<6; $i++) {
       $revs = $rts[$i]->getReviewsByItemId($itemId1);
       for ($ri=0; $ri<count($revs); $ri++) {
         $rev = $revs[$ri];
@@ -194,7 +196,7 @@ class RvrRestfulController extends AbstractRvrController
     }
     $item2Revs = array();
     $item2RevsCnt = 0;
-    for ($i=0; $i<36; $i++) {
+    for ($i=0; $i<6; $i++) {
       $revs = $rts[$i]->getReviewsByItemId($itemId2);
       for ($ri=0; $ri<count($revs); $ri++) {
         $rev = $revs[$ri];
@@ -206,10 +208,10 @@ class RvrRestfulController extends AbstractRvrController
       if ($item2RevsCnt >= $item2->review_num) { break; }
     }
 
-    unset($sm);
-    unset($dbAdapter);
-    unset($resultSetPrototype);
-    unset($rts);
+    // unset($sm);
+    // unset($dbAdapter);
+    // unset($resultSetPrototype);
+    // unset($rts);
 
     $i1Sum = 0.0;
     $i2Sum = 0.0;
