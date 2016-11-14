@@ -98,6 +98,7 @@ return array(
             'Application\Controller\Rvr' => Controller\RvrRestfulController::class,
             'Application\Controller\User' => Controller\UserRestfulController::class,
             'Application\Controller\Rep' => Controller\ReputationRestfulController::class,
+            'Application\Controller\ReviewUser' => Controller\ReviewUserRestfulController::class,
         ),
     ),
     'view_manager' => array(

@@ -36,6 +36,9 @@ use Application\Model\ItemGenreModelTable;
 use Application\Model\ReputationModel;
 use Application\Model\ReputationModelTable;
 
+use Application\Model\ReviewUserModel;
+use Application\Model\ReviewUserModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -88,7 +91,7 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemModel());
-            return new TableGateway('items_a', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('items_01', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ReviewModelTable' => function($sm){
@@ -163,6 +166,17 @@ class Module
             return new TableGateway('reputations', $dbAdapter, null, $resultSetPrototype);
           },
 
+          'Application\Model\ReviewUserModelTable' => function($sm){
+            $tableGateway = $sm->get('ReviewUserModelTableGateway');
+            $table = new ReviewUserModelTable($tableGateway);
+            return $table;
+          },
+          'ReviewUserModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new ReviewUserModel());
+            return new TableGateway('reviews_users_all01', $dbAdapter, null, $resultSetPrototype);
+          },
         )
       );
     }
