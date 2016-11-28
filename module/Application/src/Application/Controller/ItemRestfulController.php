@@ -30,8 +30,11 @@ class ItemRestfulController extends AbstractRvrController
 
   public function get($id)
   {
-    if ($id == "random") {
-      return $this->makeSuccessJson($this->getItemTable()->getItemsByRandom(10));
+    if (preg_match('/random/', $id)) {
+      $rndSp = explode("_", $id);
+      $rndNum = 10;
+      if (isset($rndSp[1]) && is_numeric($rndSp[1])) { $rndNum = +$rndSp[1]; }
+      return $this->makeSuccessJson($this->getItemTable()->getItemsByRandom($rndNum));
     } else if (preg_match('/import/', $id)) {
       $result = $this->importItemData($id);
       return $this->makeSuccessJson($result);

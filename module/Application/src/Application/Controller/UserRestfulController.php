@@ -39,7 +39,10 @@ class UserRestfulController extends AbstractRvrController
   {
     $newModel = new UserModel();
     $newModel->exchangeArray($data);
-    $newModel->name = 'User';
+
+    $userList = $this->getListRaw();
+
+    $newModel->name = 'User' . (count($userList)+1);
     $result = $this->getUserTable()->saveUser($newModel);
     $savedData = array();
     if ($result == 1) {

@@ -20,8 +20,6 @@ class ItemMatchModelTable
 
   public function getItemMatch($item_id, $matched_item_id)
   {
-    $item_id = (int)$item_id;
-    $matched_item_id = (int)$matched_item_id;
     $rowSet = $this->tableGateway->select(array('item_id' => $item_id, 'matched_item_id' => $matched_item_id));
     $row = $rowSet->current();
 
@@ -30,7 +28,7 @@ class ItemMatchModelTable
 
   public function getItemMatches($item_id)
   {
-    $item_id = (int)$item_id;
+    // $item_id = (int)$item_id;
     $select = $this->tableGateway->getSql()->select();
     $select->where->equalTo('item_id', $item_id)
                   ->or
@@ -61,10 +59,11 @@ class ItemMatchModelTable
       'users_num' => $itemMatchModel->users_num,
     );
 
-    $item_id = (int)$itemMatchModel->item_id;
-    $matched_item_id = (int)$itemMatchModel->matched_item_id;
+    $item_id = $itemMatchModel->item_id;
+    $matched_item_id = $itemMatchModel->matched_item_id;
 
-    if ($this->getItemMatch($item_id, $matched_item_id)) {
+    if ($r = $this->getItemMatch($item_id, $matched_item_id)) {
+      var_dump($r);die;
       return $this->tableGateway->update($data, array('item_id' => $item_id, 'matched_item_id' => $matched_item_id));
     } else {
       return $this->tableGateway->insert($data);

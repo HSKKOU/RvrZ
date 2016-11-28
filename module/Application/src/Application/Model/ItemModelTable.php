@@ -25,7 +25,18 @@ class ItemModelTable
     $rowSet = $this->tableGateway->select(array('id' => $id));
     $row = $rowSet->current();
     if(!$row) {
-      throw new \Exception("Could not find roe $id");
+      throw new \Exception("Could not find row $id");
+    }
+
+    return $row;
+  }
+
+  public function getItemByItemCode($code)
+  {
+    $rowSet = $this->tableGateway->select(array('item_code' => $code));
+    $row = $rowSet->current();
+    if(!$row) {
+      throw new \Exception("Could not find row $code");
     }
 
     return $row;
@@ -79,5 +90,10 @@ class ItemModelTable
   public function deleteItem($id)
   {
     return $this->tableGateway->delete(array('id' => (int)$id));
+  }
+
+  public function getItemSelect($col)
+  {
+    return $this->tableGateway->getSql()->select()->columns(array($col));
   }
 }

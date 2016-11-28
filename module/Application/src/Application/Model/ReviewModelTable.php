@@ -43,6 +43,39 @@ class ReviewModelTable
     return $retReviews;
   }
 
+  public function getReviewsByUserName($user_name)
+  {
+    $select = $this->tableGateway->getSql()->select();
+    $select->where->equalTo('user_name', $user_name);
+    $select->columns(array('user_name', 'item_id', 'point'));
+    $rowSet = $this->tableGateway->selectWith($select);
+
+    $retReviews = array();
+    while ($row = $rowSet->current()) {
+      $retReviews[] = $row;
+      $rowSet->next();
+    }
+
+    return $retReviews;
+  }
+
+  public function getReviewsByUserNameWithItemSelect($user_name, $itemSel)
+  {
+    $select = $this->tableGateway->getSql()->select();
+    $select->columns(array('user_name', 'item_id', 'point'));
+    $select->where->equalTo('user_name', $user_name)
+                  ->in('item_id', array('items' => $itemSel));
+    $rowSet = $this->tableGateway->selectWith($select);
+
+    $retReviews = array();
+    while ($row = $rowSet->current()) {
+      $retReviews[] = $row;
+      $rowSet->next();
+    }
+
+    return $retReviews;
+  }
+
   public function getReviewsByItemIdAndUserName($item_id, $user_name)
   {
     $rowSet = $this->tableGateway->select(array('item_id' => $item_id, 'user_name' => $user_name));

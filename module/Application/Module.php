@@ -94,7 +94,8 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemModel());
-            return new TableGateway('items_01', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('items_exist', $dbAdapter, null, $resultSetPrototype);
+            // return new TableGateway('items_10', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ReviewModelTable' => function($sm){
@@ -178,7 +179,7 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ReviewUserModel());
-            return new TableGateway('reviews_users_all01', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('reviews_users_all01_1_10', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ItemSimElemModelTable' => function($sm){

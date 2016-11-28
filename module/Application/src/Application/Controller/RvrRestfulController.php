@@ -21,6 +21,8 @@ class RvrRestfulController extends AbstractRvrController
   protected $reviewTable;
   protected $inputsTable;
   protected $itemMatchTable;
+  protected $reviewUserTable;
+  protected $itemSimElemTable;
 
   public function indexAction() { return new ViewModel(); }
 
@@ -43,6 +45,14 @@ class RvrRestfulController extends AbstractRvrController
     if(!$this->itemMatchTable) { $this->itemMatchTable = $this->getServiceLocator()->get('Application\Model\ItemMatchModelTable'); }
     return $this->itemMatchTable;
   }
+  public function getReviewUserTable() {
+    if(!$this->reviewUserTable) { $this->reviewUserTable = $this->getServiceLocator()->get('Application\Model\ReviewUserModelTable'); }
+    return $this->reviewUserTable;
+  }
+  public function getItemSimElemTable() {
+    if(!$this->itemSimElemTable) { $this->itemSimElemTable = $this->getServiceLocator()->get('Application\Model\ItemSimElemModelTable'); }
+    return $this->itemSimElemTable;
+  }
   /* end get db tables reference */
 
 
@@ -56,17 +66,25 @@ class RvrRestfulController extends AbstractRvrController
 
   public function get($user_id)
   {
-    if (preg_match('/updateItemMatchDataSet/', $user_id)) {
-      $itemIdSp = explode("_", $user_id);
-      $num = $this->updateItemMatchDataSet_0001($itemIdSp[1], $itemIdSp[2]);
-      return $this->makeSuccessJson('updated DataSet ' . $num);
+    // if (preg_match('/updateItemMatchDataSet/', $user_id)) {
+    //   $itemIdSp = explode("_", $user_id);
+    //   $num = $this->updateItemMatchDataSet_0001($itemIdSp[1], $itemIdSp[2]);
+    if ($user_id == 'updateItemMatchDataSet') {
+      $this->updateItemMatchDataSet();
+      return $this->makeSuccessJson('updated DataSet ');
     } else if ($user_id == 'updateItemReviewDataSet') {
       $this->updateItemReviewDataSet();
       return $this->makeSuccessJson('updated Review in Item DataSet');
+    } else if ($user_id == 'createItemSimTable') {
+      $this->createItemSimTable();
+      return $this->makeSuccessJson('created ItemSimElem Table');
     }
 
     // for DEBUG
-    if (true) {
+    if (
+      // true
+      false
+  ) {
       $items = array();
       for ($i=0; $i<50; $i++) {
         $items[] = array(
@@ -97,37 +115,33 @@ class RvrRestfulController extends AbstractRvrController
   /* Utilities */
   private function updateItemMatchDataSet()
   {
-    return;
-    $it = $this->getItemTable();
-    $imt = $this->getItemMatchTable();
-    $rt = $this->getReviewTable();
+    $imTable = $this->getItemMatchTable();
+    $iseTable = $this->getItemSimElemTable();
 
-    // TODO: should modify for memory leak
-    $scoreByItemUser = array();
-    $rowSet = $rt->fetchAll();
-    while ($row = $rowSet->current()) {
-      $itemId = $row->item_id;
-      $userName = $row->user_name;
-      if (!array_key_exists($itemId, $scoreByItemUser)) { $scoreByItemUser[$itemId] = array(); }
-      $scoreByItemUser[$itemId][$userName] = $row->point;
-      $rowSet->next();
-    }
+    $iseDatas = $iseTable->fetchAll();
 
-    // TODO: should modify for memory leak
-    foreach ($scoreByItemUser as $iid1 => $item1) {
-      foreach ($scoreByItemUser as $iid2 => $item2) {
-        if ($iid1 >= $iid2) { continue; }
-        // $s = $this->calcItemSimilarityEuclid($item1, $item2);
-        $s = $this->calcItemSimilarityPearson($item1, $item2);
-        $ima = array(
-          'item_id' => $iid1,
-          'matched_item_id' => $iid2,
-          'similarity' => $s,
-        );
-        $im = new ItemMatchModel();
-        $im->exchangeArray($ima);
-        $imt->saveItemMatch($im);
+    foreach ($iseDatas as $isk => $isv) {
+      $sim = 0;
+      if ($isv->num == 0) { break; }
+
+      $num = $isv->i1xi2Sum - $isv->i1Sum * $isv->i2Sum / floatval($isv->num);
+      $den = sqrt(($isv->i1P2Sum - pow($isv->i1Sum, 2) / floatval($isv->num)) * ($isv->i2P2Sum - pow($isv->i2Sum, 2) / floatval($isv->num)));
+
+      if (abs($den) < 0.00000001) {
+        $sim = 0.0;
+      } else {
+        $sim = $num / $den;
       }
+
+      $im = new ItemMatchModel();
+      $im->exchangeArray(array(
+        'item_id' => $isv->item1_code,
+        'matched_item_id' => $isv->item2_code,
+        'similarity' => $sim,
+        'users_num' => $isv->num,
+      ));
+
+      $imTable->saveItemMatch($im);
     }
   }
 
@@ -158,9 +172,83 @@ class RvrRestfulController extends AbstractRvrController
     return +$calcRes['num'];
   }
 
-  private function createReviewSetByItemIds($iid1, $iid2)
+  private function createItemSimTable()
   {
+    // create Review Model Table
+    $sm = $this->getServiceLocator();
 
+    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+    $resultSetPrototype = new ResultSet();
+    $resultSetPrototype->setArrayObjectPrototype(new ReviewModel());
+
+    $rts = array();
+    for ($i=0; $i<6; $i++) {
+      $rn = substr('0'.($i+1), -2, 2);
+      $reviewTable = new ReviewModelTable(new TableGateway('reviews_'.$rn, $dbAdapter, null, $resultSetPrototype));
+      $rts[] = $reviewTable;
+    }
+
+
+    $iseTable = $this->getItemSimElemTable();
+
+    // for update Debug
+    // $iseTable->saveItemSimElemByPoint(array(
+    //   'item1_code' => 'aaa:123',
+    //   'item2_code' => 'aaa:123',
+    //   'i1p' => 4,
+    //   'i2p' => 3,
+    // ));
+    // return;
+
+    $reviewUsersArray = $this->getReviewUserTable()->fetchAll();
+
+    $itemSelect = $this->getItemTable()->getItemSelect('item_code');
+
+    foreach ($reviewUsersArray as $rk => $reviewUsers) {
+      $user_name = $reviewUsers->user_name;
+      $reviewNum = $reviewUsers->reviews;
+
+      unset($reviewUsers);
+
+      // Now, $user_name and $reviewNum exist.
+
+      // item_code => point
+      $reviews = array();
+
+      for ($i=0; $i<count($rts); $i++) {
+        $rt = $rts[$i];
+        $revs = $rt->getReviewsByUserNameWithItemSelect($user_name, $itemSelect);
+        if (count($revs) == 0) { continue; }
+        for ($j=0; $j<count($revs); $j++) {
+          $rev = $revs[$j];
+          $reviews[$rev->item_id] = +$rev->point;
+        }
+        // $reviews = array_merge($reviews, $revs);
+      }
+
+      if (count($reviews) < 2) { continue; }
+
+      // save Item Similarity Elements
+      $itemCodes = array_keys($reviews);
+      usort($itemCodes, 'strcmp');
+      for ($ri=0; $ri<count($itemCodes); $ri++) {
+        $item1_code = $itemCodes[$ri];
+        for ($rj=$ri+1; $rj<count($itemCodes); $rj++) {
+          $item2_code = $itemCodes[$rj];
+
+          $iseData = array(
+            'item1_code' => $item1_code,
+            'item2_code' => $item2_code,
+            'i1p' => $reviews[$item1_code],
+            'i2p' => $reviews[$item2_code],
+          );
+          $iseTable->saveItemSimElemByPoint($iseData);
+        }
+      }
+
+      unset($reviews);
+      unset($itemCodes);
+    }
   }
 
   private function calcItemSimilarityPearson($item1, $item2)
@@ -309,6 +397,8 @@ class RvrRestfulController extends AbstractRvrController
       $itemSet->next();
     }
   }
+
+
 }
 
 
@@ -415,27 +505,29 @@ abstract class RecommendCreator
     //   'reps' => $reps,
     //   'sim' => $repsSim,
     // );
-
     return $repsSim;
   }
 
   protected function createGazeInfoForEachItems($inputs)
   {
+    $it = $this->rvrCtrl->getItemTable();
+
     $gazeInfos = array();
     // for ($i=0; $i<count($inputs); $i++) {
     foreach ($inputs as $i => $val) {
       if (!isset($inputs[$i])) { continue; }
       $ip = $inputs[$i];
       if ($ip->gaze_item_id == 0) { continue; }
-      if (!isset($gazeInfos[$ip->gaze_item_id])) {
-        $gazeInfos[$ip->gaze_item_id] = array(
+      $itemInfo = $it->getItem($ip->gaze_item_id);
+      if (!isset($gazeInfos[$itemInfo->item_code])) {
+        $gazeInfos[$itemInfo->item_code] = array(
           'count' => 1,
           'aveDist' => floatval($ip->distance),
           'totalTime' => floatval($ip->time),
         );
       } else {
-        $gi = $gazeInfos[$ip->gaze_item_id];
-        $gazeInfos[$ip->gaze_item_id] = array(
+        $gi = $gazeInfos[$itemInfo->item_code];
+        $gazeInfos[$itemInfo->item_code] = array(
           'count' => $gi['count']+1,
           'aveDist' => $gi['aveDist'] + floatval($ip->distance),
           'totalTime' => $gi['totalTime'] + floatval($ip->time),
@@ -476,7 +568,7 @@ abstract class RecommendCreator
 
 
   //
-  protected function calcReptationSimilarity($_reps, $maxCnt = 3)
+  protected function calcReptationSimilarity($_reps, $maxCnt = 50)
   {
     $imt = $this->rvrCtrl->getItemMatchTable();
     $rt = $this->rvrCtrl->getReviewTable();
@@ -485,9 +577,9 @@ abstract class RecommendCreator
     $rankings = array();
 
     foreach ($_reps as $rKey => $rep) {
-      $sims = $imt->getItemMatches(intval($rKey));
+      $sims = $imt->getItemMatches($rKey);
       foreach ($sims as $k => $v) {
-        $targetId = intval($v['matched_item_id']);
+        $targetId = $v['matched_item_id'];
         if (array_key_exists($targetId, $_reps)) { continue; }
         if (!array_key_exists($targetId, $scores)) { $scores[$targetId] = 0.0; }
         $scores[$targetId] += floatval($v['similarity']) * floatval($rep);
@@ -496,7 +588,10 @@ abstract class RecommendCreator
       }
     }
 
-    foreach ($scores as $sk => $score) { $rankings[$sk] = $score / $totalSim[$sk]; }
+    foreach ($scores as $sk => $score) {
+      if ($totalSim[$sk] == 0) { $rankings[$sk] = 0.0; continue; }
+      $rankings[$sk] = $score / $totalSim[$sk];
+    }
 
     arsort($rankings);
 
@@ -514,10 +609,10 @@ abstract class RecommendCreator
     return $result;
   }
 
-  private function getItemInfo($id)
+  private function getItemInfo($code)
   {
     $itemTable = $this->rvrCtrl->getItemTable();
-    $item = $itemTable->getItem($id);
+    $item = $itemTable->getItemByItemCode($code);
     return $item->exchangeToArray();
   }
 
