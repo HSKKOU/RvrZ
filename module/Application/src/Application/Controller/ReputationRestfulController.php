@@ -34,6 +34,8 @@ class ReputationRestfulController extends AbstractRvrController
       'user_id' => $gotModel->user_id,
       'item_id' => $gotModel->item_id,
       'reputation' => $gotModel->reputation,
+      'rank' => $gotModel->rank,
+      'type' => $gotModel->type,
     ));
   }
 
@@ -42,6 +44,7 @@ class ReputationRestfulController extends AbstractRvrController
     $reps = $data['reps'];
     foreach ($reps as $rep) {
       $rep['user_id'] = $data['user_id'];
+      $rep['type'] = $data['type'];
       $newModel = new ReputationModel();
       $newModel->exchangeArray($rep);
       $result = $this->getReputationTable()->saveReputation($newModel);
@@ -73,6 +76,8 @@ class ReputationRestfulController extends AbstractRvrController
         'user_id' => $row->user_id,
         'item_id' => $row->item_id,
         'reputation' => $row->reputation,
+        'rank' => $row->rank,
+        'type' => $row->type,
       );
     }
 

@@ -48,6 +48,8 @@ class ReputationModelTable
       'user_id' => $reputationModel->user_id,
       'item_id' => $reputationModel->item_id,
       'reputation' => $reputationModel->reputation,
+      'rank' => $reputationModel->rank,
+      'type' => $reputationModel->type,
     );
 
     $id = (int)$reputationModel->id;

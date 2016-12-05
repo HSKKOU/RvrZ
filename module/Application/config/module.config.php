@@ -87,6 +87,7 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Application\Controller\Rvr01' => Controller\Rvr01Controller::class,
+            'Application\Controller\Rvr02' => Controller\Rvr02Controller::class,
             'Application\Controller\Import' => Controller\ImportController::class,
 
             'Application\Controller\Index' => Controller\IndexController::class,
@@ -112,6 +113,7 @@ return array(
             'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
             'app/index/index'         => __DIR__ . '/../view/application/index/index.phtml',
             'application/rvr01/index'         => __DIR__ . '/../view/application/index/rvr01.phtml',
+            'application/rvr02/index'         => __DIR__ . '/../view/application/index/rvr02.phtml',
             'application/import/index'         => __DIR__ . '/../view/application/index/import.phtml',
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
             'error/index'             => __DIR__ . '/../view/error/index.phtml',

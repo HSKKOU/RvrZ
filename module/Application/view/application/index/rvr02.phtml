@@ -57,7 +57,7 @@ var \$itemTable = \$("#item_table"),
     userId = $("#user_id").val();
 
 
-getRecoms(REQ_ALL + userId, \$itemTable);
+getRecoms(REQ_EYE + userId, \$itemTable);
 
 \$selectRepBtn.on("click", function(){
   var repsOrdered = {5: [], 4: [], 3: [], 2: [], 1: []};
@@ -239,7 +239,7 @@ function postReputations(_reps) {
 
   query["reps"] = selectedReps;
   query["user_id"] = +userId;
-  query["type"] = "all";
+  query["type"] = "eye";
   log(query);
   // return;
   post({

@@ -7,6 +7,8 @@ class ReputationModel
   public $user_id;
   public $item_id;
   public $reputation;
+  public $rank;
+  public $type;
 
   public function exchangeArray($data)
   {
@@ -14,6 +16,8 @@ class ReputationModel
     $this->user_id = (isset($data['user_id']))? $data['user_id']:0;
     $this->item_id = (isset($data['item_id']))? $data['item_id']:0;
     $this->reputation = (isset($data['reputation']))? $data['reputation']:0;
+    $this->rank = (isset($data['rank']))? $data['rank']:0;
+    $this->type = (isset($data['type']))? $data['type']:'all';
   }
 
   public function exchangeToArray()
@@ -23,6 +27,8 @@ class ReputationModel
       'user_id' => $this->user_id,
       'item_id' => $this->item_id,
       'reputation' => $this->reputation,
+      'rank' => $this->rank,
+      'type' => $this->type,
     );
   }
 }

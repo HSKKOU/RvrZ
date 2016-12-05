@@ -115,6 +115,7 @@ class RvrRestfulController extends AbstractRvrController
     // $recomCrtr = new RC01OnlyTime($this, $user_id);
     // $recomCrtr = new RC01OnlyDist($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
+    shuffle($recoms);
 
     return $this->makeSuccessJson($recoms);
   }
