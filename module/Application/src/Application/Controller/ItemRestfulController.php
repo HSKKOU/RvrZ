@@ -11,6 +11,18 @@ class ItemRestfulController extends AbstractRvrController
 {
   protected $itemTable;
   protected $itemMatchesTable;
+  protected $itemGenreTable;
+
+  private $genreIds = array(
+    // 100005, // 花・ガーデン・DIY
+    // 100026, // パソコン・周辺機器
+    100227, // 食品
+    // 100316, // 水・ソフトドリンク
+    100804, // インテリア・寝具・収納
+    // 101070, // スポーツ・アウトドア
+    551177, // メンズファッション
+    558885, // 靴
+  );
 
   // get Table
   public function getItemTable() {
@@ -20,6 +32,10 @@ class ItemRestfulController extends AbstractRvrController
   public function getItemMatchTable() {
     if(!$this->itemMatchesTable) { $this->itemMatchesTable = $this->getServiceLocator()->get('Application\Model\ItemMatchModelTable'); }
     return $this->itemMatchesTable;
+  }
+  public function getItemGenreTable() {
+    if(!$this->itemMatchesTable) { $this->itemGenreTable = $this->getServiceLocator()->get('Application\Model\ItemGenreModelTable'); }
+    return $this->itemGenreTable;
   }
   // end get Tables
 
@@ -34,7 +50,9 @@ class ItemRestfulController extends AbstractRvrController
       $rndSp = explode("_", $id);
       $rndNum = 10;
       if (isset($rndSp[1]) && is_numeric($rndSp[1])) { $rndNum = +$rndSp[1]; }
-      return $this->makeSuccessJson($this->getItemTable()->getItemsByRandom($rndNum));
+      $igt = $this->getItemGenreTable();
+      $relatedGenres = $igt->getItemGenreRelated($this->genreIds);
+      return $this->makeSuccessJson($this->getItemTable()->getItemsByRandom($rndNum, $relatedGenres));
     } else if (preg_match('/import/', $id)) {
       $result = $this->importItemData($id);
       return $this->makeSuccessJson($result);

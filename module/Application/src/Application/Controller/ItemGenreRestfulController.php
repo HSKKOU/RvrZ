@@ -33,6 +33,11 @@ class ItemGenreRestfulController extends AbstractRvrController
     //   return $this->makeSuccessJson('create id tree');
     // }
 
+    if ($id == 'createSecondTop') {
+      $this->createSecondTop();
+      return $this->makeSuccessJson('create second top');
+    }
+
     $gotModel = $this->getItemGenreTable()->getItemGenre($id);
     return $this->makeSuccessJson(array(
       'id' => $gotModel->id,
@@ -81,6 +86,20 @@ class ItemGenreRestfulController extends AbstractRvrController
     if ($id < 0) { return -1; }
     $ig = $this->getItemGenreTable()->getItemGenre($id);
     return intval($ig->parent_genre_id);
+  }
+
+  private function createSecondTop()
+  {
+    $itemGenres = $this->getItemGenreTable()->fetchAll();
+    foreach ($itemGenres as $ig) {
+      if ($ig->parent_genre_id <= 0) { continue; }
+      $idTreeSp = explode(",", $ig->id_tree);
+      if (count($idTreeSp) <= 1) { continue; }
+
+      $ig->second_top = +$idTreeSp[1];
+
+      $this->getItemGenreTable()->saveItemGenre($ig);
+    }
   }
 
 

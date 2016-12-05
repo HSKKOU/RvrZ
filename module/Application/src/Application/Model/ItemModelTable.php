@@ -42,9 +42,12 @@ class ItemModelTable
     return $row;
   }
 
-  public function getItemsByRandom($num)
+  public function getItemsByRandom($num, $genreIds = array())
   {
     $select = $this->tableGateway->getSql()->select();
+    if (count($genreIds) > 0) {
+      $select->where->in('genre_id', $genreIds);
+    }
     $select->order(array( new \Zend\Db\Sql\Expression("RAND()") ));
     $select->limit($num);
 
@@ -57,6 +60,8 @@ class ItemModelTable
       $ret[] = $row->exchangeToArray();
       $rowSet->next();
     }
+
+    // var_dump($ret);die;
 
     return $ret;
   }

@@ -30,6 +30,19 @@ class ItemGenreModelTable
     return $row;
   }
 
+  public function getItemGenreRelated($pids)
+  {
+    $select = $this->tableGateway->getSql()->select();
+    $select->where->in('second_top', $pids);
+    $rowSet = $this->tableGateway->selectWith($select);
+
+    while ($row = $rowSet->current()) {
+      $pids[] = +$row->id;
+      $rowSet->next();
+    }
+    return $pids;
+  }
+
   public function getLastItemGenre()
   {
     $id = $this->getLastId();
@@ -48,6 +61,7 @@ class ItemGenreModelTable
       'genre_name' => $itemGenreModel->genre_name,
       'parent_genre_id' => $itemGenreModel->parent_genre_id,
       'id_tree' => $itemGenreModel->id_tree,
+      'second_top' => $itemGenreModel->second_top,
     );
 
     $id = (int)$itemGenreModel->id;
