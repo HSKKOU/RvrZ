@@ -96,9 +96,24 @@ class RvrRestfulController extends AbstractRvrController
       return $this->makeSuccessJson(array("items" => $items));
     }
 
+
+
+    $requestSp = explode("_", $user_id);
+    $type = $requestSp[0];
+    $uId = +$requestSp[1];
+
+    $recomCrtr;
+    switch ($type) {
+      case 'all':
+        $recomCrtr = new RC01All($this, $uId);
+        break;
+      case 'eye':
+        $recomCrtr = new RC01OnlyTime($this, $uId);
+        break;
+    }
+
     // $recomCrtr = new RC01OnlyTime($this, $user_id);
     // $recomCrtr = new RC01OnlyDist($this, $user_id);
-    $recomCrtr = new RC01All($this, $user_id);
     $recoms = $recomCrtr->createRecommendations();
 
     return $this->makeSuccessJson($recoms);
@@ -498,7 +513,7 @@ abstract class RecommendCreator
     $inputs = $this->rvrCtrl->getInputsTable()->getInputsByUser($this->user_id);
     $gis = $this->createGazeInfoForEachItems($inputs);
     $reps = $this->calcReputationFromGazeInfo($gis);
-    $repsSim = $this->calcReptationSimilarity($reps);
+    $repsSim = $this->calcReptationSimilarity($reps, 50);
 
     // return array(
     //   'gis' => $gis,
