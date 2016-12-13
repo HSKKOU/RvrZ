@@ -101,6 +101,7 @@ return array(
             'Application\Controller\Rep' => Controller\ReputationRestfulController::class,
             'Application\Controller\ReviewUser' => Controller\ReviewUserRestfulController::class,
             'Application\Controller\ItemSimElem' => Controller\ItemSimElemRestfulController::class,
+            'Application\Controller\DisplayItem' => Controller\DisplayItemRestfulController::class,
         ),
     ),
     'view_manager' => array(

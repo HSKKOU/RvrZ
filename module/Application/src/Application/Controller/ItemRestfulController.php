@@ -6,12 +6,15 @@ use Zend\View\Model\JsonModel;
 
 use Application\Model\ItemModel;
 use Application\Model\ItemMatchModel;
+use Application\Model\ItemGenreModel;
+use Application\Model\DisplayItemModel;
 
 class ItemRestfulController extends AbstractRvrController
 {
   protected $itemTable;
   protected $itemMatchesTable;
   protected $itemGenreTable;
+  protected $displayItemTable;
 
   private $genreIds = array(
     // 100005, // 花・ガーデン・DIY
@@ -19,9 +22,9 @@ class ItemRestfulController extends AbstractRvrController
     100227, // 食品
     // 100316, // 水・ソフトドリンク
     100804, // インテリア・寝具・収納
-    // 101070, // スポーツ・アウトドア
+    101070, // スポーツ・アウトドア
     551177, // メンズファッション
-    558885, // 靴
+    // 558885, // 靴
   );
 
   // get Table
@@ -34,8 +37,12 @@ class ItemRestfulController extends AbstractRvrController
     return $this->itemMatchesTable;
   }
   public function getItemGenreTable() {
-    if(!$this->itemMatchesTable) { $this->itemGenreTable = $this->getServiceLocator()->get('Application\Model\ItemGenreModelTable'); }
+    if(!$this->itemGenreTable) { $this->itemGenreTable = $this->getServiceLocator()->get('Application\Model\ItemGenreModelTable'); }
     return $this->itemGenreTable;
+  }
+  public function getDisplayItemTable() {
+    if(!$this->displayItemTable) { $this->displayItemTable = $this->getServiceLocator()->get('Application\Model\DisplayItemModelTable'); }
+    return $this->displayItemTable;
   }
   // end get Tables
 
@@ -52,7 +59,28 @@ class ItemRestfulController extends AbstractRvrController
       if (isset($rndSp[1]) && is_numeric($rndSp[1])) { $rndNum = +$rndSp[1]; }
       $igt = $this->getItemGenreTable();
       $relatedGenres = $igt->getItemGenreRelated($this->genreIds);
-      return $this->makeSuccessJson($this->getItemTable()->getItemsByRandom($rndNum, $relatedGenres));
+
+      // $result = array();
+      // for ($i=0; $i<$rndNum; $i++) {
+      //   $item = new ItemModel();
+      //   $item->id = $i+1;
+      //   $item->name = "Item".($i+1);
+      //   $item->url_image = "/img/index.png";
+      // }
+      // return $this->makeSuccessJson($result);
+
+      $rndItems = $this->getItemTable()->getItemsByRandom($rndNum, $relatedGenres);
+      if (isset($rndSp[2]) && is_numeric($rndSp[2])) {
+        $userId = +$rndSp[2];
+        $diTable = $this->getDisplayItemTable();
+        foreach ($rndItems as $ik => $iv) {
+          $di = new DisplayItemModel();
+          $di->user_id = $userId;
+          $di->item_id = +$iv["id"];
+          $diTable->saveDisplayItem($di);
+        }
+      }
+      return $this->makeSuccessJson($rndItems);
     } else if (preg_match('/import/', $id)) {
       $result = $this->importItemData($id);
       return $this->makeSuccessJson($result);

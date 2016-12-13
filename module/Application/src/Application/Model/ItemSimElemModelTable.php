@@ -25,6 +25,14 @@ class ItemSimElemModelTable
     return $row;
   }
 
+  public function getItemSimElemWithNum2Than()
+  {
+    $select = $this->tableGateway->getSql()->select();
+    $select->where->greaterThan('num', 1);
+    $rowSet =  $this->tableGateway->selectWith($select);
+    return $rowSet;
+  }
+
   public function saveItemSimElem(ItemSimElemModel $itemSimElemModel)
   {
     $data = array(

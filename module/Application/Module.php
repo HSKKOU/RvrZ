@@ -42,6 +42,9 @@ use Application\Model\ReviewUserModelTable;
 use Application\Model\ItemSimElemModel;
 use Application\Model\ItemSimElemModelTable;
 
+use Application\Model\DisplayItemModel;
+use Application\Model\DisplayItemModelTable;
+
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -94,8 +97,8 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemModel());
-            return new TableGateway('items_exist', $dbAdapter, null, $resultSetPrototype);
-            // return new TableGateway('items_10', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('items_exist_1_10', $dbAdapter, null, $resultSetPrototype);
+            // return new TableGateway('items_1_17', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ReviewModelTable' => function($sm){
@@ -143,7 +146,7 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemMatchModel());
-            return new TableGateway('item_match', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('item_match_1_10', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ItemGenreModelTable' => function($sm){
@@ -179,7 +182,7 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ReviewUserModel());
-            return new TableGateway('reviews_users_all01_1_10', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('reviews_users_all01_1_17', $dbAdapter, null, $resultSetPrototype);
           },
 
           'Application\Model\ItemSimElemModelTable' => function($sm){
@@ -191,7 +194,19 @@ class Module
             $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
             $resultSetPrototype = new ResultSet();
             $resultSetPrototype->setArrayObjectPrototype(new ItemSimElemModel());
-            return new TableGateway('item_sim_elem', $dbAdapter, null, $resultSetPrototype);
+            return new TableGateway('item_sim_elem_1_17', $dbAdapter, null, $resultSetPrototype);
+          },
+
+          'Application\Model\DisplayItemModelTable' => function($sm){
+            $tableGateway = $sm->get('DisplayItemModelTableGateway');
+            $table = new DisplayItemModelTable($tableGateway);
+            return $table;
+          },
+          'DisplayItemModelTableGateway' => function($sm){
+            $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+            $resultSetPrototype = new ResultSet();
+            $resultSetPrototype->setArrayObjectPrototype(new DisplayItemModel());
+            return new TableGateway('display_items', $dbAdapter, null, $resultSetPrototype);
           },
         )
       );

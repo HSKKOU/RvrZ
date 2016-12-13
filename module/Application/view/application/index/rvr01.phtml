@@ -131,7 +131,7 @@ function getRecoms(_api_url, \$_itemTable) {
   post({
     "url": url,
     "type": "get",
-    "query": query,
+    // "query": query,
     "success": function(_data){
       log("success", _data);
       setRecommendations(_data, \$_itemTable);

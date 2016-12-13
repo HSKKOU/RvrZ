@@ -88,12 +88,15 @@ class RvrRestfulController extends AbstractRvrController
       $items = array();
       for ($i=0; $i<50; $i++) {
         $items[] = array(
-          "id" => $i,
-          "title" => "Item " . $i,
-          "img" => "/img/index.png",
+          "itemInfo" => array(
+            "id" => $i,
+            "name" => "Item " . $i,
+            "url_image" => "/img/index.png",
+          ),
+          "score" => rand(0,1000)/1000.0*4.0 + 1.0,
         );
       }
-      return $this->makeSuccessJson(array("items" => $items));
+      return $this->makeSuccessJson($items);
     }
 
 
@@ -101,7 +104,6 @@ class RvrRestfulController extends AbstractRvrController
     $requestSp = explode("_", $user_id);
     $type = $requestSp[0];
     $uId = +$requestSp[1];
-
     $recomCrtr;
     switch ($type) {
       case 'all':
@@ -148,6 +150,8 @@ class RvrRestfulController extends AbstractRvrController
       } else {
         $sim = $num / $den;
       }
+
+      if ($sim == 0.0) { continue; }
 
       $im = new ItemMatchModel();
       $im->exchangeArray(array(
