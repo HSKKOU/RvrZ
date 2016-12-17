@@ -232,7 +232,8 @@ function postReputations(_reps) {
     var selRep = {
       "item_id": +_reps[i]["itemInfo"]["id"],
       "reputation": +_reps[i]["reputation"],
-      "rank": +_reps[i]["rank"]
+      "rank": +_reps[i]["rank"],
+      "expected" : +_reps[i]["score"]
     };
     selectedReps.push(selRep);
   }

@@ -89,6 +89,7 @@ return array(
             'Application\Controller\Rvr01' => Controller\Rvr01Controller::class,
             'Application\Controller\Rvr02' => Controller\Rvr02Controller::class,
             'Application\Controller\Import' => Controller\ImportController::class,
+            'Application\Controller\Analysis' => Controller\AnalysisController::class,
 
             'Application\Controller\Index' => Controller\IndexController::class,
             'Application\Controller\Test' => Controller\TestRestfulController::class,
@@ -116,6 +117,7 @@ return array(
             'application/rvr01/index'         => __DIR__ . '/../view/application/index/rvr01.phtml',
             'application/rvr02/index'         => __DIR__ . '/../view/application/index/rvr02.phtml',
             'application/import/index'         => __DIR__ . '/../view/application/index/import.phtml',
+            'application/analysis/index'         => __DIR__ . '/../view/application/index/analysis.phtml',
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
             'error/index'             => __DIR__ . '/../view/error/index.phtml',
         ),

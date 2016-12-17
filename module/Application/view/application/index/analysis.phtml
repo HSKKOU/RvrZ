@@ -1,0 +1,124 @@
+<h1>Analysis Reputation</h1>
+<table id="analysis_table" border="1">
+  <thead>
+    <tr>
+      <th class="userid"></th>
+      <th class="all" colspan="5">ALL</th>
+      <th class="eye" colspan="5">EYE</th>
+    </tr>
+    <tr>
+      <th class="userid">user id</th>
+      <th class="all_dcg">DCG</th>
+      <th class="all_ndcg">nDCG</th>
+      <th class="all_pearson">Pearson</th>
+      <th class="all_mae">MAE</th>
+      <th class="all_precision">Precision</th>
+      <th class="eye_dcg">DCG</th>
+      <th class="eye_ndcg">nDCG</th>
+      <th class="eye_pearson">Pearson</th>
+      <th class="eye_mae">MAE</th>
+      <th class="eye_precision">Precision</th>
+    </tr>
+  </thead>
+  <tbody style="text-align:right">
+    <tr>
+      <td class="userid"></td>
+      <td class="all_dcg"></td>
+      <td class="all_ndcg"></td>
+      <td class="all_pearson"></td>
+      <td class="all_mae"></td>
+      <td class="all_precision"></td>
+      <td class="eye_dcg"></td>
+      <td class="eye_ndcg"></td>
+      <td class="eye_pearson"></td>
+      <td class="eye_mae"></td>
+      <td class="eye_precision"></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<?php
+
+$this->inlineScript()->appendScript(
+<<<__END__
+
+var \$analysisTable = \$("#analysis_table"),
+    \$analysisTableBody = \$analysisTable.find("tbody"),
+    \$repRowTmp = \$analysisTableBody.find("tr").remove().clone();
+
+getUsers(function(_users){
+  createAnalysisTable(_users);
+});
+
+function getUsers(_callback){
+  post({
+    "url": "http://localhost/app/user",
+    "type": "get",
+    "query": {},
+    "callback": function(_result, _data){
+      if(_result){ _callback(_data["data"]) }
+    }
+  });
+}
+
+function createAnalysisTable(_users){
+  log(_users);
+  for(var ui in _users){
+    var \$repRow = \$repRowTmp.clone().appendTo(\$analysisTableBody);
+
+    (function(_user){
+      var id = +_user["id"],
+          baseURL = "http://localhost/app/rep/analysis_" + id;
+      \$repRow.find(".userid").text(id);
+      getRepAnalysis(baseURL+"_", "all", \$repRow);
+      getRepAnalysis(baseURL+"_", "eye", \$repRow);
+    })(_users[ui]);
+  }
+}
+
+function getRepAnalysis(_baseUrl, _type, \$_row){
+  post({
+    "url": _baseUrl+_type,
+    "type": "get",
+    "callback": function(_result, _data){
+      if(_result){
+        var data = _data['data'];
+        log(data);
+        \$_row.find("."+_type+"_dcg").text(round(data['dcg']['DCG'], 4));
+        \$_row.find("."+_type+"_ndcg").text(round(data['dcg']['nDCG'], 4));
+        \$_row.find("."+_type+"_pearson").text(round(data['pearson'], 4));
+        \$_row.find("."+_type+"_mae").text(round(data['mae'], 4));
+        \$_row.find("."+_type+"_precision").text(round(data['precision'], 4));
+      }
+    }
+  });
+}
+
+function round(_num, _n){
+  if (_num == null) { return null; }
+  var pow = Math.pow(10, _n);
+  return Math.round(+_num * pow) / pow;
+}
+
+
+function log(_){ console.log.apply(console, arguments); }
+function post(_opt){
+  var url = _opt["url"],
+      type = _opt["type"],
+      query = _opt["query"],
+      callback = _opt["callback"];
+  $.ajax({
+    "type": type,
+    "url": url,
+    "data": JSON.stringify(query),
+    "contentType": "application/json",
+    "dataType": "json",
+    "success": function(_data){ callback(true, _data); },
+    "error": function(_data){ callback(false, {"statusCode": _data["status"], "response": _data["responseText"]}); }
+  });
+}
+
+
+__END__
+);

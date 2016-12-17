@@ -435,7 +435,7 @@ class RvrRestfulController extends AbstractRvrController
 class RC01 extends RecommendCreator
 {
   protected $maxStar = 5.0;
-  protected $minStar = 1.0;
+  protected $minStar = 3.0;
 
   protected function calcReputationFromGazeInfo($_gis){ return array(); }
 }

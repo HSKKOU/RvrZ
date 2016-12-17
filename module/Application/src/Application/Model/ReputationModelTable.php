@@ -30,6 +30,18 @@ class ReputationModelTable
     return $row;
   }
 
+  public function getRepByUseridAndType($user_id, $type)
+  {
+    $user_id = (int)$user_id;
+    $rowSet = $this->tableGateway->select(array('user_id' => $user_id, 'type' => $type));
+    $retArr = array();
+    while ($row = $rowSet->current()) {
+      $retArr[] = $row->exchangeToArray();
+      $rowSet->next();
+    }
+    return $retArr;
+  }
+
   public function getLastReputation()
   {
     $id = $this->getLastId();
@@ -49,6 +61,7 @@ class ReputationModelTable
       'item_id' => $reputationModel->item_id,
       'reputation' => $reputationModel->reputation,
       'rank' => $reputationModel->rank,
+      'expected' => $reputationModel->expected,
       'type' => $reputationModel->type,
     );
 
